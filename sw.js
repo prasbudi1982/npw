@@ -1,41 +1,60 @@
-
-const CACHE_NAME = 'npw-v8.1-pwa-2025';
-const ASSETS = [
+// Nasgor Pak W PWA - SW v8.2 GitHub Pages Fix
+const CACHE = 'npw-pwa-v8-2';
+const CORE = [
   './',
   './index.html',
   './customer.html',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './manifest.json'
 ];
 
 self.addEventListener('install', e=>{
-  e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE).then(c=> c.addAll(CORE).catch(err=>console.log('cache add fail', err)))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e=>{
-  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));
-  self.clients.claim();
+  e.waitUntil(
+    caches.keys().then(keys=> Promise.all(
+      keys.filter(k=> k!==CACHE).map(k=> caches.delete(k))
+    )).then(()=> self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', e=>{
-  const url = new URL(e.request.url);
-  // API jangan di-cache, langsung network
-  if(url.pathname.startsWith('/api/') || url.href.includes('workers.dev')){
-    e.respondWith(fetch(e.request).catch(()=>caches.match('./customer.html')));
+  const req = e.request;
+  const url = new URL(req.url);
+  
+  // Jangan cache API Worker Cloudflare
+  if(url.hostname.includes('workers.dev') || url.pathname.startsWith('/api/')){
+    e.respondWith(fetch(req).catch(()=> caches.match('./index.html')));
     return;
   }
-  // Untuk assets lain: cache first, fallback network
+
+  // HTML navigation - network first, fallback cache
+  if(req.mode === 'navigate'){
+    e.respondWith(
+      fetch(req).then(r=>{
+        const clone = r.clone();
+        caches.open(CACHE).then(c=> c.put(req, clone));
+        return r;
+      }).catch(()=> caches.match('./index.html') || caches.match('./'))
+    );
+    return;
+  }
+
+  // Assets - cache first
   e.respondWith(
-    caches.match(e.request).then(cached=>{
-      if(cached) return cached;
-      return fetch(e.request).then(res=>{
-        // cache new
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache=>cache.put(e.request, clone));
+    caches.match(req).then(hit=>{
+      if(hit) return hit;
+      return fetch(req).then(res=>{
+        if(res.ok && req.method==='GET' && url.origin===location.origin){
+          const clone = res.clone();
+          caches.open(CACHE).then(c=> c.put(req, clone));
+        }
         return res;
-      }).catch(()=>caches.match('./customer.html'));
+      }).catch(()=> hit);
     })
   );
 });
