@@ -2,7 +2,7 @@
   "name": "Nasgor Pak W - Official Warung Online",
   "short_name": "Nasgor Pak W",
   "description": "Pesan Nasgor Pak W online, real sync, pre-order, radius ongkir",
-  "start_url": "./customer.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0A0A0A",
   "theme_color": "#FF6B2B",
@@ -20,5 +20,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "scope": "./",
+  "id": "./"
 }
