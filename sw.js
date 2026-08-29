@@ -2,6 +2,7 @@
 const CACHE_NAME = 'npw-v8.1-pwa-2025';
 const ASSETS = [
   './',
+  './index.html',
   './customer.html',
   './manifest.json',
   './icons/icon-192.png',
