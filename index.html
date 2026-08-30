@@ -5,21 +5,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nasgor Pak W - Official Warung Online V8.1 Real Sync</title>
 <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#FF6B2B">
 <script src="https://cdn.tailwindcss.com"></script>
+<meta name="color-scheme" content="light dark">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#0A0A0A;color:#fff}
-.card-menu{background:#1A1A1A;border:1px solid rgba(255,255,255,0.08)}
+:root{
+  color-scheme: light dark;
+  --bg:#0A0A0A;
+  --bg-soft:#1A1A1A;
+  --bg-input:#0F0F0F;
+  --bg-blur:rgba(10,10,10,0.9);
+  --text:#ffffff;
+  --text-muted:rgba(255,255,255,0.5);
+  --text-soft:rgba(255,255,255,0.7);
+  --border:rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.10);
+  --card-shadow:none;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#F6F3EE;
+    --bg-soft:#FFFFFF;
+    --bg-input:#FFFFFF;
+    --bg-blur:rgba(246,243,238,0.9);
+    --text:#111111;
+    --text-muted:rgba(17,17,17,0.5);
+    --text-soft:rgba(17,17,17,0.7);
+    --border:rgba(17,17,17,0.08);
+    --border-strong:rgba(17,17,17,0.12);
+    --card-shadow:0 4px 24px rgba(0,0,0,0.06);
+  }
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);transition: background-color .25s, color .25s}
+.card-menu{background:var(--bg-soft);border:1px solid var(--border);box-shadow:var(--card-shadow);transition: background-color .25s, border-color .25s}
 .card-menu.soldout{opacity:0.5;pointer-events:none}
 #detailModal .relative{padding-bottom:0 !important;}
 #cartBar{padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;}
+
+  /* Manual theme override via data-theme */
+  :root[data-theme="light"]{
+    --bg:#F6F3EE;
+    --bg-soft:#FFFFFF;
+    --bg-input:#FFFFFF;
+    --bg-blur:rgba(246,243,238,0.9);
+    --text:#111111;
+    --text-muted:rgba(17,17,17,0.5);
+    --text-soft:rgba(17,17,17,0.7);
+    --border:rgba(17,17,17,0.08);
+    --border-strong:rgba(17,17,17,0.12);
+    --card-shadow:0 4px 24px rgba(0,0,0,0.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0A0A0A;
+    --bg-soft:#1A1A1A;
+    --bg-input:#0F0F0F;
+    --bg-blur:rgba(10,10,10,0.9);
+    --text:#ffffff;
+    --text-muted:rgba(255,255,255,0.5);
+    --text-soft:rgba(255,255,255,0.7);
+    --border:rgba(255,255,255,0.08);
+    --border-strong:rgba(255,255,255,0.10);
+    --card-shadow:none;
+  }
+  #themeToggle{
+    transition: transform .15s;
+  }
+  #themeToggle:active{ transform:scale(0.9); }
+
+  /* theme adaptive helpers */
+.bg-theme{ background:var(--bg) !important; }
+.bg-theme-soft{ background:var(--bg-soft) !important; }
+.bg-theme-input{ background:var(--bg-input) !important; }
+.border-theme{ border-color:var(--border) !important; }
+.border-theme-strong{ border-color:var(--border-strong) !important; }
+.text-theme{ color:var(--text) !important; }
+.text-muted{ color:var(--text-muted) !important; }
 </style>
 
 <style>
 #splashScreen{
   position:fixed; inset:0; z-index:9999;
-  background:#0A0A0A;
+  background:var(--bg);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   transition: opacity 0.5s ease, visibility 0.5s;
 }
@@ -38,6 +107,67 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#0A0A0A;color:#fff}
 @keyframes spin{ to{ transform:rotate(360deg); } }
 </style>
 
+<style id="theme-adaptive">
+/* Header & Blur */
+.sticky.top-0{ background:var(--bg-blur) !important; border-color:var(--border) !important; }
+/* Cards / Banners that used #1A1A1A / #0F0F0F */
+.bg-\[\#1A1A1A\]{ background:var(--bg-soft) !important; }
+.bg-\[\#0F0F0F\]{ background:var(--bg-input) !important; }
+.bg-\[\#0A0A0A\]\/90{ background:var(--bg-blur) !important; }
+.border-white\/\[0\.08\]{ border-color:var(--border) !important; }
+.border-white\/10{ border-color:var(--border-strong) !important; }
+.bg-white\/10{ background:rgba(128,128,128,0.12) !important; }
+@media (prefers-color-scheme: light){
+  .bg-white\/10{ background:rgba(0,0,0,0.06) !important; }
+  .bg-black\/70{ background:rgba(0,0,0,0.35) !important; }
+  .text-white{ color:var(--text) !important; }
+}
+/* keep splash loader border visible in light */
+@media (prefers-color-scheme: light){
+  .splash-loader{ border-color:rgba(0,0,0,0.1); border-top-color:#FF6B2B; }
+}
+/* cartBar & modals */
+#cartBar{ background:var(--bg-soft) !important; border-color:var(--border) !important; }
+#detailModal .bg-\[\#1A1A1A\], #checkoutModal .bg-\[\#1A1A1A\], #historyModal .bg-\[\#1A1A1A\]{ background:var(--bg-soft) !important; }
+#detailModal, #checkoutModal, #historyModal{ color:var(--text); }
+/* inputs */
+input, textarea, select{ background:var(--bg-input) !important; color:var(--text) !important; border-color:var(--border) !important; }
+input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
+
+  /* Fix opsi varian & pedas di mode terang */
+  .opt-btn{
+    transition: all .2s ease;
+  }
+  .opt-btn.is-selected{
+    background: var(--text) !important;
+    color: var(--bg) !important;
+    border-color: var(--text) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .opt-btn.is-unselected{
+    background: var(--bg-input) !important;
+    color: var(--text) !important;
+    border-color: var(--border-strong) !important;
+  }
+  .opt-btn.is-unselected:hover{
+    border-color: var(--text) !important;
+    opacity:0.9;
+  }
+  /* light mode khusus biar kontras lebih jelas */
+  :root[data-theme="light"] .opt-btn.is-selected,
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]) .opt-btn.is-selected{
+      background:#111 !important;
+      color:#fff !important;
+      border-color:#111 !important;
+    }
+  }
+
+  /* keep primary orange buttons */
+.bg-\[\#FF6B2B\]{ color:#fff !important; }
+</style>
+
+
 </head>
 <body class="pb-36">
 
@@ -55,6 +185,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#0A0A0A;color:#fff}
 <div class="min-w-0"><h1 class="text-[16px] font-extrabold leading-tight">Nasgor Pak W</h1><div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] opacity-50">Official Warung Online • Real Sync</span></div></div>
 </div>
 <div class="flex gap-2 items-center shrink-0">
+<button id="themeToggle" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-[14px]" title="Ganti tema">🌙</button>
 <button onclick="openHistory()" class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">🕘</button>
 <button id="installBtn" class="hidden px-3 py-2 rounded-full bg-[#FF6B2B] text-[11px] font-bold">Install</button>
 </div>
@@ -287,19 +418,19 @@ function openDetail(id){
   const varBox=document.getElementById('variantBox'); const varList=document.getElementById('variantList');
   if(varianGroup && varianGroup.options && varianGroup.options.length>0){
     varBox.classList.remove('hidden'); curVariant=varianGroup.options[0];
-    varList.innerHTML=varianGroup.options.map((o,i)=>`<button onclick="pickVariant(${i})" id="varBtn${i}" class="rounded-full border ${i===0?'bg-white text-black border-white':'bg-[#0F0F0F] border-white/10'} px-4 py-2.5 text-[12px] font-bold">${o.label||o.name}<br><span class="text-[11px] opacity-70">${fmt(o.price)}</span></button>`).join('');
+    varList.innerHTML=varianGroup.options.map((o,i)=>`<button onclick="pickVariant(${i})" id="varBtn${i}" class="opt-btn rounded-full border ${i===0?'is-selected':'is-unselected'} px-4 py-2.5 text-[12px] font-bold">${o.label||o.name}<br><span class="text-[11px] opacity-70">${fmt(o.price)}</span></button>`).join('');
   } else { varBox.classList.add('hidden'); curVariant={label:'Biasa', price:m.price}; }
   const pedasList=document.getElementById('pedasList');
   if(pedasGroup && pedasGroup.options){
-    pedasList.innerHTML=pedasGroup.options.map((o,i)=>`<button onclick="pickPedas(${i})" id="pedasBtn${i}" class="rounded-full border ${i===0?'bg-white text-black border-white':'bg-[#0F0F0F] border-white/10'} px-3 py-2 text-[11px]">${o.label||o.name}</button>`).join(''); curPedas=pedasGroup.options[0];
+    pedasList.innerHTML=pedasGroup.options.map((o,i)=>`<button onclick="pickPedas(${i})" id="pedasBtn${i}" class="opt-btn rounded-full border ${i===0?'is-selected':'is-unselected'} px-3 py-2 text-[11px]">${o.label||o.name}</button>`).join(''); curPedas=pedasGroup.options[0];
   } else { pedasList.innerHTML='<div class="opacity-50 text-[11px]">Tidak ada level pedas</div>'; }
   const addonList=document.getElementById('addonList'); addonList.innerHTML=(m.addons||[]).map((a,idx)=>`<div class="flex justify-between items-center bg-[#0F0F0F] border border-white/10 rounded-full px-4 py-2.5"><div><div class="text-[12px] font-bold">${a.name}</div><div class="text-[10px] opacity-50">+${fmt(a.price)}</div></div><div class="flex items-center gap-2"><button onclick="changeAddon(${idx},-1)" class="w-7 h-7 rounded-full bg-white/10">-</button><span id="addonQty${idx}" class="text-[12px] w-4 text-center">0</span><button onclick="changeAddon(${idx},1)" class="w-7 h-7 rounded-full bg-white text-black">+</button></div></div>`).join('') || '<div class="opacity-40 text-[11px]">Tanpa addon</div>';
   document.getElementById('customRequest').value=''; document.getElementById('customRequestCount').textContent='0'; document.getElementById('detailQty').textContent='1';
   updateDetailPrice(); document.getElementById('detailModal').classList.remove('hidden');
 }
 function closeDetail(){ document.getElementById('detailModal').classList.add('hidden'); }
-function pickVariant(i){ const m=_curDetailObj; const grp=m.variants?.find(x=>x.id==='varian'); if(!grp) return; curVariant=grp.options[i]; document.querySelectorAll('[id^=varBtn]').forEach((b,idx)=>{ b.className= idx===i?'rounded-full border bg-white text-black border-white px-4 py-2.5 text-[12px] font-bold':'rounded-full border bg-[#0F0F0F] border-white/10 px-4 py-2.5 text-[12px] font-bold'; }); updateDetailPrice(); }
-function pickPedas(i){ const m=_curDetailObj; const grp=m.variants?.find(x=>x.id==='pedas'); if(!grp) return; curPedas=grp.options[i]; document.querySelectorAll('[id^=pedasBtn]').forEach((b,idx)=>{ b.className= idx===i?'rounded-full border bg-white text-black border-white px-3 py-2 text-[11px]':'rounded-full border bg-[#0F0F0F] border-white/10 px-3 py-2 text-[11px]'; }); }
+function pickVariant(i){ const m=_curDetailObj; const grp=m.variants?.find(x=>x.id==='varian'); if(!grp) return; curVariant=grp.options[i]; document.querySelectorAll('[id^=varBtn]').forEach((b,idx)=>{ b.className= 'opt-btn rounded-full border '+(idx===i?'is-selected':'is-unselected')+' px-4 py-2.5 text-[12px] font-bold'; }); updateDetailPrice(); }
+function pickPedas(i){ const m=_curDetailObj; const grp=m.variants?.find(x=>x.id==='pedas'); if(!grp) return; curPedas=grp.options[i]; document.querySelectorAll('[id^=pedasBtn]').forEach((b,idx)=>{ b.className= 'opt-btn rounded-full border '+(idx===i?'is-selected':'is-unselected')+' px-3 py-2 text-[11px]'; }); }
 function changeDetailQty(d){ curQty=Math.max(1,curQty+d); document.getElementById('detailQty').textContent=curQty; updateDetailPrice(); }
 function changeAddon(idx,d){ const m=_curDetailObj; const a=m.addons[idx]; const cur=curAddons[idx]||0; const next=Math.max(0,Math.min(a.max||10,cur+d)); curAddons[idx]=next; document.getElementById('addonQty'+idx).textContent=next; updateDetailPrice(); }
 function updateDetailPrice(){
@@ -538,6 +669,70 @@ function hideSplash(){
     if(s){ s.classList.add('hide'); setTimeout(()=>s.remove(), 600); }
   }, delay);
 }
+
+// --- THEME SWITCH ---
+const THEME_KEY = 'npw_theme'; // auto | light | dark
+function getSystemTheme(){
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+function applyTheme(theme){
+  const root = document.documentElement;
+  if(!theme || theme==='auto'){
+    root.removeAttribute('data-theme');
+    localStorage.removeItem(THEME_KEY);
+  } else {
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem(THEME_KEY, theme);
+  }
+  updateThemeIcon(theme || 'auto');
+  // update meta theme-color
+  const metaDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
+  const metaLight = document.querySelector('meta[name="theme-color"][media*="light"]');
+  // also keep generic meta synced for PWA bar
+  let genericMeta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if(!genericMeta){
+    genericMeta = document.createElement('meta');
+    genericMeta.name='theme-color';
+    document.head.appendChild(genericMeta);
+  }
+  const effective = theme==='auto' || !theme ? getSystemTheme() : theme;
+  genericMeta.content = effective==='light' ? '#F6F3EE' : '#0A0A0A';
+}
+function updateThemeIcon(theme){
+  const btn = document.getElementById('themeToggle');
+  if(!btn) return;
+  const effective = theme==='auto' || !theme ? getSystemTheme() : theme;
+  if(theme==='auto' || !theme){
+    btn.textContent = '📱';
+    btn.title = 'Auto (ikut HP) - klik untuk Light';
+  } else if(theme==='light'){
+    btn.textContent = '☀️';
+    btn.title = 'Light - klik untuk Dark';
+  } else {
+    btn.textContent = '🌙';
+    btn.title = 'Dark - klik untuk Auto';
+  }
+}
+function toggleTheme(){
+  const current = localStorage.getItem(THEME_KEY) || 'auto';
+  let next;
+  if(current==='auto') next='light';
+  else if(current==='light') next='dark';
+  else next='auto';
+  applyTheme(next);
+}
+(function initTheme(){
+  const saved = localStorage.getItem(THEME_KEY) || 'auto';
+  applyTheme(saved);
+  // listen system change if auto
+  if(window.matchMedia){
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()=>{
+      const cur = localStorage.getItem(THEME_KEY) || 'auto';
+      if(cur==='auto') applyTheme('auto');
+    });
+  }
+})();
+
 fetchWarungConfig().then(()=>{
   loadMenu().then(()=> hideSplash()).catch(()=> hideSplash());
 }).catch(()=> hideSplash());
