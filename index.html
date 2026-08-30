@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nasgor Pak W - Official Warung Online V8.1 Real Sync</title>
+<title>Nasgor Pak W - Official Warung Online V8.1 </title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
@@ -83,6 +83,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .border-theme-strong{ border-color:var(--border-strong) !important; }
 .text-theme{ color:var(--text) !important; }
 .text-muted{ color:var(--text-muted) !important; }
+
+#categoryTabs{-ms-overflow-style:none;scrollbar-width:none;}
+#categoryTabs::-webkit-scrollbar{display:none;}
+.cat-tab{white-space:nowrap;border-radius:9999px;padding:10px 18px;font-size:12px;font-weight:700;background:var(--bg-soft);border:1px solid var(--border);color:var(--text-soft);cursor:pointer;transition:.2s;}
+.cat-tab.active-cat{background:#FF6B2B!important;color:#fff!important;border-color:#FF6B2B!important;box-shadow:0 4px 14px rgba(255,107,43,.35);}
 </style>
 
 <style>
@@ -105,6 +110,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .splash-sub{ margin-top:6px; font-size:11px; opacity:0.5; letter-spacing:1px; text-transform:uppercase; }
 .splash-loader{ margin-top:24px; width:32px; height:32px; border:3px solid rgba(255,255,255,0.1); border-top-color:#FF6B2B; border-radius:50%; animation: spin 0.8s linear infinite; }
 @keyframes spin{ to{ transform:rotate(360deg); } }
+
+#categoryTabs{-ms-overflow-style:none;scrollbar-width:none;}
+#categoryTabs::-webkit-scrollbar{display:none;}
+.cat-tab{white-space:nowrap;border-radius:9999px;padding:10px 18px;font-size:12px;font-weight:700;background:var(--bg-soft);border:1px solid var(--border);color:var(--text-soft);cursor:pointer;transition:.2s;}
+.cat-tab.active-cat{background:#FF6B2B!important;color:#fff!important;border-color:#FF6B2B!important;box-shadow:0 4px 14px rgba(255,107,43,.35);}
 </style>
 
 <style id="theme-adaptive">
@@ -165,6 +175,11 @@ input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
 
   /* keep primary orange buttons */
 .bg-\[\#FF6B2B\]{ color:#fff !important; }
+
+#categoryTabs{-ms-overflow-style:none;scrollbar-width:none;}
+#categoryTabs::-webkit-scrollbar{display:none;}
+.cat-tab{white-space:nowrap;border-radius:9999px;padding:10px 18px;font-size:12px;font-weight:700;background:var(--bg-soft);border:1px solid var(--border);color:var(--text-soft);cursor:pointer;transition:.2s;}
+.cat-tab.active-cat{background:#FF6B2B!important;color:#fff!important;border-color:#FF6B2B!important;box-shadow:0 4px 14px rgba(255,107,43,.35);}
 </style>
 
 
@@ -207,6 +222,13 @@ input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
 </div>
 <div id="warungOpenBanner" class="hidden mt-4 rounded-[16px] bg-[#22c55e]/10 border border-[#22c55e]/20 p-3 flex gap-3 items-center"><div class="w-8 h-8 rounded-full bg-[#22c55e]/20 flex items-center justify-center">🟢</div><div class="flex-1"><div class="text-[12px] font-bold text-[#22c55e]">Warung Buka</div><div id="warungOpenInfo" class="text-[11px] opacity-70"></div></div></div>
 
+<div id="categoryTabs" class="mt-5 flex gap-2 overflow-x-auto pb-2">
+  <button data-cat="all" onclick="filterKategori('all')" class="cat-tab active-cat" type="button">🔥 Semua</button>
+  <button data-cat="makanan" onclick="filterKategori('makanan')" class="cat-tab" type="button">🍛 Makanan</button>
+  <button data-cat="minuman" onclick="filterKategori('minuman')" class="cat-tab" type="button">🥤 Minuman</button>
+  <button data-cat="camilan" onclick="filterKategori('camilan')" class="cat-tab" type="button">🍟 Camilan</button>
+</div>
+<div id="categoryInfo" class="mt-1 text-[11px] opacity-60"></div>
 <div id="loading" class="mt-6 text-center opacity-50 text-[12px]">Memuat menu real...</div>
 <div id="menuGrid" class="mt-6 grid grid-cols-2 gap-3"></div>
 </div>
@@ -265,7 +287,7 @@ input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
 <button id="btnBayarCOD" onclick="bayar('cod')" class="w-full rounded-full bg-white text-black py-4 font-bold text-[15px] border border-white disabled:opacity-40 disabled:pointer-events-none">🚚 Bayar COD - Bayar di Tempat</button>
 <button onclick="bayar('pickup')" class="w-full rounded-full bg-white/10 border border-white/10 py-4 font-bold text-[15px]">🏪 Pickup / Ambil di Warung (Tanpa Ongkir)</button>
 </div>
-<div class="mt-3 text-[10px] opacity-40 text-center">Pickup boleh tanpa GPS • Delivery/COD wajib GPS terkunci & valid (real sync backend)</div>
+<div class="mt-3 text-[10px] opacity-40 text-center">Pickup boleh tanpa GPS • Delivery/COD wajib GPS terkunci & valid </div>
 </div></div>
 
 <div id="paymentModal" class="fixed inset-0 z-[80] hidden">
@@ -277,7 +299,7 @@ input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
 <div class="mt-4 rounded-[14px] bg-[#0F0F0F] border border-white/10 p-3 max-h-[220px] overflow-auto text-[11px] whitespace-pre-wrap leading-relaxed" id="payOrderDetail"></div>
 <div class="mt-4 grid grid-cols-2 gap-2"><button onclick="copyWA()" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📋 Copy Pesan</button><button onclick="openTracking()" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📦 Lacak Pesanan</button></div>
 <div class="mt-4"><a id="waLink" href="#" onclick="return handleWAConfirm(event)" class="block w-full text-center rounded-full bg-[#25D366] text-black py-4 font-bold text-[15px] shadow-[0_4px_16px_rgba(37,211,102,0.4)]">📲 Konfirmasi WA & Simpan (Real)</a></div>
-<div class="mt-3 text-[10px] opacity-40 text-center">Pesanan disimpan ke database real • WA admin otomatis terbuka</div>
+<div class="mt-3 text-[10px] opacity-40 text-center">Pesanan disimpan ke database • WA admin otomatis terbuka</div>
 </div></div></div>
 
 <div id="historyModal" class="fixed inset-0 z-50 hidden">
@@ -392,7 +414,7 @@ async function loadMenu(){
       const statusLabel = !isActive ? 'TIDAK AKTIF' : (sold ? 'HABIS' : 'AKTIF');
       const statusColor = !isActive ? 'bg-gray-500' : (sold ? 'bg-red-500' : 'bg-[#22c55e]');
       // Badge tidak aktif tetap tampil, menu TIDAK disembunyikan (sesuai request)
-      return `<div class="card-menu ${sold?'soldout':''} rounded-[18px] p-3 cursor-pointer active:scale-[0.98] relative overflow-hidden border ${!isActive?'border-gray-500/30':''}" onclick="openDetail('${m.id}')">
+      return `<div data-category="${(m.category||'').toLowerCase()}" class="card-menu ${sold?'soldout':''} rounded-[18px] p-3 cursor-pointer active:scale-[0.98] relative overflow-hidden border ${!isActive?'border-gray-500/30':''}" onclick="openDetail('${m.id}')">
         ${m.badge?`<div class="absolute top-2 left-2 z-10 text-[8px] bg-[#FF6B2B] px-2 py-1 rounded-full font-bold shadow-lg">${m.badge}</div>`:''}
         <div class="absolute top-2 right-2 z-10 text-[7px] ${statusColor} px-2 py-1 rounded-full font-bold shadow-lg">${statusLabel}</div>
         <div class="w-full h-[80px] rounded-[12px] bg-[#0F0F0F] flex items-center justify-center text-[36px] mt-3 ${!isActive?'grayscale opacity-60':''}">${emoji}</div>
@@ -542,7 +564,7 @@ function handleWAConfirm(e){ e.preventDefault(); const waLinkEl=document.getElem
         localStorage.setItem('npw_customer_profile', JSON.stringify(custProfile));
         // also keep last used for autofill
         localStorage.setItem('npw_last_customer', JSON.stringify(custProfile));
-      }catch(e){} localStorage.setItem('npw_history', JSON.stringify(hist.slice(0,10))); } window.dbSaved=true; waLinkEl.textContent='Membuka WA...'; setTimeout(()=>{ window.open(window.pendingWAUrl,'_blank'); setTimeout(()=>{ closePaymentAndClearCart(); },1000); },600); }).catch(err=>{ console.error('Fetch error:', err); alert('❌ Failed to fetch - Worker tidak bisa dihubungi:\n'+err.message+'\n\n1) Pastikan Worker https://nasgor-v2.welybudiprasetya.workers.dev/api/config bisa dibuka\n2) Cek internet\n3) Coba buka di tab baru: '+API_BASE+'/api/config'); waLinkEl.textContent='📲 Konfirmasi WA & Simpan (Real)'; waLinkEl.style.pointerEvents='auto'; }); return false; }
+      }catch(e){} localStorage.setItem('npw_history', JSON.stringify(hist.slice(0,10))); } window.dbSaved=true; waLinkEl.textContent='Membuka WA...'; setTimeout(()=>{ window.open(window.pendingWAUrl,'_blank'); setTimeout(()=>{ closePaymentAndClearCart(); },1000); },600); }).catch(err=>{ console.error('Fetch error:', err); alert('❌ Failed to fetch - Worker tidak bisa dihubungi:\n'+err.message+'\n\n1) Pastikan Worker https://nasgor-v2.welybudiprasetya.workers.dev/api/config bisa dibuka\n2) Cek internet\n3) Coba buka di tab baru: '+API_BASE+'/api/config'); waLinkEl.textContent='📲 Konfirmasi WA & Simpan'; waLinkEl.style.pointerEvents='auto'; }); return false; }
 function closePaymentAndClearCart(){ cart=[]; curAddons={}; curQty=1; localStorage.removeItem('npw_cart'); updateCartUI(); document.getElementById('cartBar').classList.add('hidden'); document.getElementById('checkoutModal').classList.add('hidden'); document.getElementById('paymentModal').classList.add('hidden'); window.pendingPayload=null; window.dbSaved=false; gpsValidated=false; mapValidated=false; mapLocked=false; lastValidCoords=null; curOngkir=0; curJarak=0; checkMapValidationUI(); const waLinkEl=document.getElementById('waLink'); if(waLinkEl){ waLinkEl.textContent='📲 Konfirmasi WA & Simpan (Real)'; waLinkEl.style.pointerEvents='auto'; waLinkEl.href='#'; } }
 function closePaymentModal(){ document.getElementById('paymentModal').classList.add('hidden'); if(window.dbSaved){ closePaymentAndClearCart(); } else { if(cart.length>0) document.getElementById('cartBar').classList.remove('hidden'); } }
 function openTracking(){ const id=localStorage.getItem('last_order_id')||curOrderId; if(!id){ alert('Belum ada order real'); return; } const trackUrl='track.html?id='+encodeURIComponent(id); window.open(trackUrl,'_blank'); }
@@ -744,6 +766,40 @@ setTimeout(()=> hideSplash(), 3000);
 
 
 
+
+
+<script>
+let currentFilter = 'all';
+function filterKategori(cat){
+  console.log('filter',cat);
+  currentFilter = cat;
+  document.querySelectorAll('.cat-tab').forEach(b=>{
+    if(b.dataset.cat===cat) b.classList.add('active-cat');
+    else b.classList.remove('active-cat');
+  });
+  const cards = document.querySelectorAll('#menuGrid [data-category]');
+  let visible = 0;
+  cards.forEach(card=>{
+    let c = (card.getAttribute('data-category')||'').toLowerCase();
+    if(c==='nasgor' || c==='mie' || c==='lain') c='makanan'; // mapping lama
+    const show = (cat==='all' || c===cat);
+    card.style.display = show ? '' : 'none';
+    if(show) visible++;
+  });
+  const info = document.getElementById('categoryInfo');
+  if(info){
+    const label = cat==='all' ? 'Semua Menu' : cat.charAt(0).toUpperCase()+cat.slice(1);
+    info.textContent = visible ? `${label} • ${visible} menu` : `${label} • belum ada menu`;
+  }
+}
+// update info after original loadMenus finishes
+const origUpdateCart = window.updateCartUI;
+window.updateCartUI = function(){
+  if(typeof origUpdateCart==='function') origUpdateCart();
+  // after render, apply current filter
+  setTimeout(()=>{ filterKategori(currentFilter); }, 50);
+};
+</script>
 
 </body>
 </html>
