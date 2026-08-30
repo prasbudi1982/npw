@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nasgor Pak W - Official Warung Online V8.1 </title>
@@ -400,8 +421,22 @@ async function loadMenu(){
     const r=await fetch(API_BASE+'/api/menus',{cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const data=await r.json(); 
-    // Ubah tampil dari yang paling lama (ASC) - bukan terbaru
-    const sorted = (data||[]).slice().sort((a,b)=> new Date(a.created_at||0) - new Date(b.created_at||0));
+    // AUTO: yang habis / tidak aktif taruh di bawah, tanpa ubah urutan lainnya
+    function _isHabis(m){
+      if(!m) return false;
+      const active = !(m.active===0 || m.active===false || m.active==='0' || m.active==='false');
+      if(!active) return true;
+      if((m.stock_status||'').toLowerCase()==='soldout') return true;
+      const nm = (m.name||'').toLowerCase();
+      if(nm.includes('(habis)') || nm.includes('habis')) return true;
+      return false;
+    }
+    const sorted = (data||[]).slice().sort((a,b)=>{
+      const ha = _isHabis(a)?1:0;
+      const hb = _isHabis(b)?1:0;
+      if(ha!==hb) return ha-hb; // habis di bawah
+      return new Date(a.created_at||0) - new Date(b.created_at||0);
+    });
     menus=sorted;
     document.getElementById('loading').style.display='none';
     if(menus.length===0){ document.getElementById('menuGrid').innerHTML='<div class="col-span-2 text-center opacity-50 py-10 text-[12px]">Belum ada menu real di DB • Tambah via Admin</div>'; return; }
@@ -422,6 +457,24 @@ async function loadMenu(){
                 <div class="mt-1 font-extrabold text-[13px]">${fmt(basePrice)} ${varian?.options?.length>1?`<span class="text-[10px] opacity-50 font-normal">• ${varian.options.length} varian</span>`:''}</div>
         </div></div>`;
     }).join('');
+    // safety: pastikan elemen dengan class soldout tetap di bawah di DOM
+    setTimeout(()=>{
+      try{
+        const grid=document.getElementById('menuGrid');
+        if(!grid) return;
+        const cards=Array.from(grid.children);
+        cards.sort((a,b)=>{
+          const ah=a.classList.contains('soldout')|| (a.innerText||'').toLowerCase().includes('(habis)');
+          const bh=b.classList.contains('soldout')|| (b.innerText||'').toLowerCase().includes('(habis)');
+          if(ah&&!bh) return 1;
+          if(!ah&&bh) return -1;
+          return 0;
+        });
+        cards.forEach(c=>grid.appendChild(c));
+        // apply filter lagi biar info jumlah benar
+        if(typeof filterKategori==='function' && typeof currentFilter!=='undefined') filterKategori(currentFilter);
+      }catch(e){}
+    },0);
     updateCartUI();
   }catch(e){ document.getElementById('loading').textContent='Gagal load menu real: '+e.message; }
 }
@@ -755,6 +808,101 @@ function toggleTheme(){
   }
 })();
 
+
+// === AUTO REFRESH BACKGROUND - MENU SELALU UPDATE TANPA GANGGU CUSTOMER ===
+let _lastMenuSignature = '';
+function _menuSignature(arr){
+  try{
+    return (arr||[]).map(m=> `${m.id}|${m.stock_status}|${m.active}|${m.price}|${m.name}`).join(';');
+  }catch{ return ''; }
+}
+async function backgroundRefreshMenu(silent=true){
+  try{
+    const r = await fetch(API_BASE+'/api/menus',{cache:'no-store'});
+    if(!r.ok) return;
+    const data = await r.json();
+    const sig = _menuSignature(data);
+    if(sig && sig===_lastMenuSignature) return; // tidak ada perubahan
+    _lastMenuSignature = sig;
+    // sort sama seperti loadMenu: habis di bawah, lalu ASC created_at
+    function _isHabis(m){
+      if(!m) return false;
+      const active = !(m.active===0 || m.active===false || m.active==='0' || m.active==='false');
+      if(!active) return true;
+      if((m.stock_status||'').toLowerCase()==='soldout') return true;
+      const nm = (m.name||'').toLowerCase();
+      if(nm.includes('(habis)') || nm.includes('habis')) return true;
+      return false;
+    }
+    const sorted = (data||[]).slice().sort((a,b)=>{
+      const ha=_isHabis(a)?1:0, hb=_isHabis(b)?1:0;
+      if(ha!==hb) return ha-hb;
+      return new Date(a.created_at||0)-new Date(b.created_at||0);
+    });
+    menus = sorted;
+    // render ulang tanpa ganggu loading / cart / modal
+    const grid = document.getElementById('menuGrid');
+    if(!grid) return;
+    const wasDetailOpen = !document.getElementById('detailModal')?.classList.contains('hidden');
+    // simpan scroll
+    const scrollY = window.scrollY;
+    grid.innerHTML = menus.map(m=>{
+      const emoji=m.emoji||getEmojiForMenu(m.name,m.category);
+      const sold=m.stock_status==='soldout';
+      const isActive = (m.active!==0 && m.active!==false && m.active!=='0');
+      const varian=m.variants?.find(x=>x.id==='varian')||m.variants?.[0];
+      const basePrice = varian?.options?.[0]?.price || m.price;
+      const statusLabel = !isActive ? 'TIDAK AKTIF' : (sold ? 'HABIS' : 'AKTIF');
+      const statusColor = !isActive ? 'bg-gray-500' : (sold ? 'bg-red-500' : 'bg-[#22c55e]');
+      return `<div data-category="${(m.category||'').toLowerCase()}" class="card-menu ${sold?'soldout':''} rounded-[18px] p-3 cursor-pointer active:scale-[0.98] relative overflow-hidden border ${!isActive?'border-gray-500/30':''}" onclick="openDetail('${m.id}')">
+        ${m.badge?`<div class="absolute top-2 left-2 z-10 text-[8px] bg-[#FF6B2B] px-2 py-1 rounded-full font-bold shadow-lg">${m.badge}</div>`:''}
+        <div class="absolute top-2 right-2 z-10 text-[7px] ${statusColor} px-2 py-1 rounded-full font-bold shadow-lg">${statusLabel}</div>
+        <div class="w-full h-[80px] rounded-[12px] bg-[#0F0F0F] flex items-center justify-center text-[36px] mt-3 ${!isActive?'grayscale opacity-60':''}">${emoji}</div>
+        <div class="mt-2"><div class="font-bold text-[13px] leading-tight ${!isActive?'opacity-70':''}">${m.name}</div>
+                <div class="mt-1 font-extrabold text-[13px]">${fmt(basePrice)} ${varian?.options?.length>1?`<span class="text-[10px] opacity-50 font-normal">• ${varian.options.length} varian</span>`:''}</div>
+        </div></div>`;
+    }).join('');
+    // pastikan habis tetap di bawah di DOM
+    const cards=Array.from(grid.children);
+    cards.sort((a,b)=>{
+      const ah=a.classList.contains('soldout')|| (a.innerText||'').toLowerCase().includes('(habis)');
+      const bh=b.classList.contains('soldout')|| (b.innerText||'').toLowerCase().includes('(habis)');
+      if(ah&&!bh) return 1;
+      if(!ah&&bh) return -1;
+      return 0;
+    });
+    cards.forEach(c=>grid.appendChild(c));
+    if(typeof currentFilter!=='undefined' && typeof filterKategori==='function'){
+      filterKategori(currentFilter);
+    }
+    // jangan ganggu detail modal / cart
+    window.scrollTo(0, scrollY);
+    if(!silent) console.log('menu refreshed background', menus.length);
+  }catch(e){
+    if(!silent) console.log('bg refresh fail', e);
+  }
+}
+// set signature awal setelah loadMenu pertama
+const _origLoadMenuForBg = window.loadMenu;
+if(typeof _origLoadMenuForBg==='function'){
+  const _orig = _origLoadMenuForBg;
+  window.loadMenu = async function(){
+    const res = await _orig.apply(this, arguments);
+    try{ _lastMenuSignature = _menuSignature(menus); }catch{}
+    return res;
+  };
+}
+// interval background: 45 detik
+setInterval(()=> backgroundRefreshMenu(true), 45000);
+// refresh saat user balik ke tab
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible'){
+    backgroundRefreshMenu(true);
+  }
+});
+// refresh juga saat koneksi balik online
+window.addEventListener('online', ()=> backgroundRefreshMenu(true));
+
 fetchWarungConfig().then(()=>{
   loadMenu().then(()=> hideSplash()).catch(()=> hideSplash());
 }).catch(()=> hideSplash());
@@ -801,5 +949,5 @@ window.updateCartUI = function(){
 };
 </script>
 
-</body>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
 </html>
