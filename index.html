@@ -30,6 +30,7 @@
 <meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#FF6B2B">
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta name="color-scheme" content="light dark">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
@@ -280,7 +281,25 @@ input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
 <div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-10 mx-auto max-w-[480px] p-5 max-h-[92vh] overflow-auto">
 <div class="flex justify-between items-center"><h2 class="font-bold">Keranjang • <span id="modalCount">0</span></h2><button onclick="document.getElementById('checkoutModal').classList.add('hidden')" class="w-9 h-9 rounded-full bg-white text-black">✕</button></div>
 <div class="mt-4 space-y-3">
-<input id="custName" placeholder="Nama *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
+
+<div id="googleLoginWrapper" class="rounded-[14px] bg-white/5 border border-white/10 p-3 mb-3">
+  <div class="flex justify-between items-center">
+    <div class="text-[11px] font-bold opacity-80">⚡ Isi otomatis dengan Google?</div>
+    <div id="googleLoginStatus" class="text-[10px] opacity-50">Opsional</div>
+  </div>
+  <div id="googleLoginBox" class="mt-2.5"></div>
+  <div id="googleProfileBox" class="hidden mt-2 flex items-center gap-2.5">
+    <img id="googlePic" src="" class="w-8 h-8 rounded-full bg-white/10"/>
+    <div class="flex-1 min-w-0">
+      <div id="googleName" class="text-[12px] font-bold truncate"></div>
+      <div id="googleEmail" class="text-[10px] opacity-50 truncate"></div>
+    </div>
+    <button onclick="googleLogout()" class="text-[10px] px-3 py-1.5 rounded-full bg-white/10 border border-white/10 font-bold">Ganti</button>
+  </div>
+
+</div>
+<input id="custName"
+ placeholder="Nama *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
 <input id="custPhone" placeholder="HP WA *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
 <textarea id="custAddr" placeholder="Alamat lengkap (Patokan) *" class="w-full rounded-[18px] bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none min-h-[70px]"></textarea>
 <div class="rounded-[16px] bg-[#0F0F0F] border border-[#22c55e]/20 p-3">
@@ -319,7 +338,7 @@ input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
 <div class="mt-2 text-[12px] opacity-60">Order ID: <span id="payOrderId" class="font-bold">-</span> • Total: <span id="payTotal" class="font-bold text-[#FF6B2B]">Rp 0</span></div>
 <div class="mt-4 rounded-[14px] bg-[#0F0F0F] border border-white/10 p-3 max-h-[220px] overflow-auto text-[11px] whitespace-pre-wrap leading-relaxed" id="payOrderDetail"></div>
 <div class="mt-4 grid grid-cols-2 gap-2"><button onclick="copyWA()" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📋 Copy Pesan</button><button onclick="openTracking()" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📦 Lacak Pesanan</button></div>
-<div class="mt-4"><a id="waLink" href="#" onclick="return handleWAConfirm(event)" class="block w-full text-center rounded-full bg-[#25D366] text-black py-4 font-bold text-[15px] shadow-[0_4px_16px_rgba(37,211,102,0.4)]">📲 Konfirmasi WA & Simpan (Real)</a></div>
+<div class="mt-4"><a id="waLink" href="#" onclick="return handleWAConfirm(event)" class="block w-full text-center rounded-full bg-[#25D366] text-black py-4 font-bold text-[15px] shadow-[0_4px_16px_rgba(37,211,102,0.4)]">📲 Konfirmasi WA</a></div>
 <div class="mt-3 text-[10px] opacity-40 text-center">Pesanan disimpan ke database • WA admin otomatis terbuka</div>
 </div></div></div>
 
@@ -579,10 +598,101 @@ function getGPS_old(){
   }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
 }
 
+
+// === VALIDASI & NORMALISASI HP UNTUK WA REDIRECT ADMIN ===
+function normalizePhoneForWA(raw){
+  if(!raw) return '';
+  let p = String(raw).replace(/[^0-9]/g,''); // hanya angka
+  // hapus leading 0 berulang
+  if(p.startsWith('0')) p = p.replace(/^0+/, '');
+  // jika mulai 8 -> 62 + 8...
+  if(p.startsWith('8')) p = '62' + p;
+  // jika mulai 62 sudah ok
+  // jika mulai 628... sudah ok
+  // jika masih 0 di depan setelah proses
+  p = p.replace(/^0+/, '');
+  if(!p.startsWith('62')) {
+    // fallback jika user ketik 62xxxx tanpa 62? sudah handle
+    // jika masih tidak 62, coba paksa jika panjang 9-12 dan mulai 8
+    if(p.length>=9 && p.length<=13 && !p.startsWith('62')){
+      // asumsikan nomor lokal tanpa 0
+      if(!p.startsWith('62')) p = '62' + p.replace(/^0+/, '');
+    }
+  }
+  return p;
+}
+function isValidIndonesianPhone(raw){
+  const p = normalizePhoneForWA(raw);
+  // minimal 10 digit (62812...), maksimal 15, harus mulai 62 dan setelahnya 8
+  if(!p) return false;
+  if(p.length < 10 || p.length > 15) return false;
+  if(!p.startsWith('62')) return false;
+  // setelah 62 harus 8 (hp Indonesia)
+  const after62 = p.slice(2);
+  if(!after62.startsWith('8')) return false;
+  // tidak boleh semua angka sama
+  if(/^([0-9])\1+$/.test(p)) return false;
+  return true;
+}
+function validatePhoneField(){
+  const el = document.getElementById('custPhone');
+  if(!el) return true;
+  const raw = el.value.trim();
+  const ok = isValidIndonesianPhone(raw);
+  if(!ok){
+    el.classList.add('!border-red-500');
+    el.classList.add('border-red-500');
+    return false;
+  } else {
+    el.classList.remove('!border-red-500');
+    el.classList.remove('border-red-500');
+    // auto-format ke 62... saat blur
+    const norm = normalizePhoneForWA(raw);
+    if(norm!==raw) {
+      // simpan yang rapi tapi tetap tampil 0...? kita tampilkan 62...
+      // el.value = norm;
+    }
+    return true;
+  }
+}
+// live validation
+setTimeout(()=>{
+  const ph = document.getElementById('custPhone');
+  if(ph){
+    ph.setAttribute('inputmode','numeric');
+    ph.setAttribute('placeholder','HP WA (08xx / 628xx) *');
+    ph.addEventListener('input', ()=>{
+      // hanya angka, +, spasi, -
+      let v = ph.value.replace(/[^0-9+\s\-]/g,'');
+      if(v!==ph.value) ph.value = v;
+      validatePhoneField();
+    });
+    ph.addEventListener('blur', ()=>{
+      const norm = normalizePhoneForWA(ph.value.trim());
+      if(isValidIndonesianPhone(ph.value)){
+        // tampilkan format 62... agar admin bisa langsung wa.me
+        ph.value = norm;
+      }
+      validatePhoneField();
+    });
+  }
+}, 800);
+
 function bayar(method){
   if(cart.length===0){ alert('Keranjang kosong!'); return; }
-  const name=document.getElementById('custName').value.trim(); const phone=document.getElementById('custPhone').value.trim(); const addr=document.getElementById('custAddr').value.trim(); const mapsCheck=document.getElementById('custMaps').value.trim();
+  const name=document.getElementById('custName').value.trim(); 
+  let phone=document.getElementById('custPhone').value.trim(); 
+  const addr=document.getElementById('custAddr').value.trim(); 
+  const mapsCheck=document.getElementById('custMaps').value.trim();
   if(!name||!phone||!addr){ alert('Nama, HP, Alamat wajib diisi'); return; }
+  // VALIDASI HP - support WA redirect admin
+  if(!isValidIndonesianPhone(phone)){
+    alert('Nomor HP tidak valid.\nContoh valid: 0812xxxxxxx atau 62812xxxxxxx\nHarus nomor HP Indonesia aktif WA.');
+    const el=document.getElementById('custPhone'); if(el){ el.focus(); el.classList.add('border-red-500'); el.classList.add('!border-red-500'); }
+    return;
+  }
+  phone = normalizePhoneForWA(phone); // simpan format 62... agar wa.me langsung jalan di dashboard admin
+
   if(method!=='pickup'){
     const latLng=parseLatLng(mapsCheck); if(!latLng){ alert('GPS belum terkunci. Klik GPS dulu.'); return; }
     if(!mapLocked){ alert('Wajib Kunci & Validasi hijau untuk COD. Klik tombol Kunci & Validasi.'); return; }
@@ -595,13 +705,18 @@ function bayar(method){
   const tableNoValue = addr + " | Maps: "+mapsCheck+" | Jarak: "+(curJarak?curJarak.toFixed(3)+'km':'-')+" | Ongkir: "+(curOngkir===0?"Gratis":fmt(curOngkir)) + " | Warung: "+WARUNG.maps + " | Metode: "+method.toUpperCase() + (document.getElementById('preorderSlot').value? " | Pre-Order: "+document.getElementById('preorderSlot').value : "") + " | COD/Pickup Only";
   curOrderId='NPW-'+Math.floor(100000+Math.random()*900000);
   document.getElementById('payOrderId').textContent=curOrderId; document.getElementById('payTotal').textContent=fmt(grand);
-  const nowWIB = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Jakarta'}));
-  const tglWIB = nowWIB.toLocaleDateString('id-ID', {weekday:'long', day:'2-digit', month:'long', year:'numeric', timeZone:'Asia/Jakarta'}) + ' ' + nowWIB.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Jakarta'}) + ' WIB';
-  let rincian=`*PESANAN NASGOR PAK W - ${method.toUpperCase()} - REAL*\n📅 ${tglWIB}\nWarung: ${WARUNG.name}\nLokasi: ${WARUNG.maps}\nOrder: ${curOrderId}\nNama: ${name}\nHP: ${phone}\nAlamat: ${addr}\nMaps: ${mapsCheck}\nJarak: ${curJarak?curJarak.toFixed(3)+'km':''} | Ongkir: ${curOngkir===0?"Gratis":fmt(curOngkir)}\n`;
+  // PESAN WA SEDERHANA - tanpa komentar tidak perlu, langsung siap redirect admin
+  let rincian=`Halo Nasgor Pak W, ada pesanan baru!\n\nOrder: ${curOrderId}\nNama: ${name}\nHP: ${phone}\nAlamat: ${addr}\nMaps: ${mapsCheck}\n`;
+  if(curJarak>0) rincian+=`Jarak: ${curJarak.toFixed(2)}km | Ongkir: ${curOngkir===0?'Gratis':fmt(curOngkir)}\n`;
   if(document.getElementById('preorderSlot').value) rincian+=`Pre-Order: ${document.getElementById('preorderSlot').value} WIB\n`;
-  rincian+=`\n*RINCIAN PESANAN:*\n`;
-  cart.forEach((c,i)=>{ rincian+=(i+1)+`. ${c.emoji||''} ${c.name} (${c.variantLabel}) x${c.qty} = ${fmt(c.totalPrice)}\n`; if(c.pedasLabel) rincian+=`   🌶️ ${c.pedasLabel}\n`; if(c.addons && c.addons.length>0){ rincian+=`   ➕ ${c.addons.map(a=>a.qty+'x '+a.label).join(', ')}\n`; } if(c.note) rincian+=`   📝 ${c.note}\n`; });
-  rincian+=`\nSubtotal: ${fmt(sub)}\nOngkir: ${curOngkir===0?"Gratis":fmt(curOngkir)}\n*TOTAL BAYAR: ${fmt(grand)}*\n\nMetode: ${method.toUpperCase()} | Real Sync Backend V8.1\n`;
+  rincian+=`\nPesanan:\n`;
+  cart.forEach((c,i)=>{ 
+    rincian+=`${i+1}. ${c.name} ${c.variantLabel!=='Biasa'?'('+c.variantLabel+')':''} x${c.qty} = ${fmt(c.totalPrice)}\n`;
+    if(c.pedasLabel) rincian+=`   Pedas: ${c.pedasLabel}\n`;
+    if(c.addons && c.addons.length>0) rincian+=`   Addon: ${c.addons.map(a=>a.qty+'x '+a.label).join(', ')}\n`;
+    if(c.note) rincian+=`   Catatan: ${c.note}\n`;
+  });
+  rincian+=`\nSubtotal: ${fmt(sub)}\nOngkir: ${curOngkir===0?'Gratis':fmt(curOngkir)}\nTOTAL: ${fmt(grand)}\n\nMetode: ${method.toUpperCase()}\n`;
   document.getElementById('payOrderDetail').textContent=rincian; window.lastWA=rincian;
   const waUrl="https://wa.me/6282296728478?text="+encodeURIComponent(rincian); document.getElementById('waLink').href=waUrl;
   document.getElementById('checkoutModal').classList.add('hidden'); document.getElementById('cartBar').classList.add('hidden'); document.getElementById('paymentModal').classList.remove('hidden');
@@ -807,6 +922,163 @@ function toggleTheme(){
     });
   }
 })();
+
+
+
+// === GOOGLE LOGIN INTEGRATION - OPSIONAL, AUTO NAMA PELANGGAN ===
+const GOOGLE_CLIENT_ID = "783222505177-p7ite7jetiathok0fl927tsmu5m0ae0m.apps.googleusercontent.com";
+let _googleProfile = null;
+
+function handleGoogleCredential(response){
+  try{
+    const payload = JSON.parse(atob(response.credential.split('.').map(p=>p.replace(/-/g,'+').replace(/_/g,'/'))[1] || response.credential.split('.')[1]));
+    // fallback decode
+  }catch(e){}
+  try{
+    const base64 = response.credential.split('.')[1];
+    const json = JSON.parse(decodeURIComponent(atob(base64).split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join('')));
+    const name = json.name || '';
+    const email = json.email || '';
+    const picture = json.picture || '';
+    _googleProfile = {name,email,picture, credential: response.credential};
+    localStorage.setItem('npw_google_profile', JSON.stringify({name,email,picture, updated_at: new Date().toISOString()}));
+    // auto isi nama pelanggan
+    const nameEl = document.getElementById('custName');
+    if(nameEl){ 
+      if(!nameEl.value || nameEl.value.trim().length<2) nameEl.value = name;
+      else {
+        // jika sudah ada, tanya? kita timpa saja jika beda tipis, tapi jangan paksa
+        // nameEl.value = name;
+      }
+    }
+    // simpan juga ke customer profile yang sudah ada
+    try{
+      const existing = JSON.parse(localStorage.getItem('npw_customer_profile')||'{}');
+      existing.name = name;
+      existing.email = email;
+      existing.google_picture = picture;
+      existing.updated_at = new Date().toISOString();
+      localStorage.setItem('npw_customer_profile', JSON.stringify(existing));
+    }catch(e){}
+    updateGoogleUI();
+    // hilangkan prompt setelah sukses
+    try{ google.accounts.id.cancel(); }catch(e){}
+  }catch(err){
+    console.log('google parse fail', err);
+  }
+}
+
+function updateGoogleUI(){
+  try{
+    const wrapper = document.getElementById('googleLoginWrapper');
+    const box = document.getElementById('googleLoginBox');
+    const profileBox = document.getElementById('googleProfileBox');
+    const status = document.getElementById('googleLoginStatus');
+    const saved = JSON.parse(localStorage.getItem('npw_google_profile')||'null');
+    if(saved && saved.name){
+      if(box) box.classList.add('hidden');
+      if(profileBox){ 
+        profileBox.classList.remove('hidden');
+        profileBox.classList.add('flex');
+        const picEl = document.getElementById('googlePic');
+        const nameEl = document.getElementById('googleName');
+        const emailEl = document.getElementById('googleEmail');
+        if(picEl) picEl.src = saved.picture || '';
+        if(nameEl) nameEl.textContent = saved.name;
+        if(emailEl) emailEl.textContent = saved.email || '';
+      }
+      if(status) status.textContent = 'Terhubung ✓';
+      // auto isi jika field kosong
+      const custNameEl = document.getElementById('custName');
+      if(custNameEl && (!custNameEl.value || custNameEl.value.trim().length<2)){
+        custNameEl.value = saved.name;
+      }
+    } else {
+      if(box) box.classList.remove('hidden');
+      if(profileBox){ profileBox.classList.add('hidden'); profileBox.classList.remove('flex'); }
+      if(status) status.textContent = 'Opsional';
+    }
+  }catch(e){}
+}
+
+function googleLogout(){
+  localStorage.removeItem('npw_google_profile');
+  _googleProfile = null;
+  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
+  updateGoogleUI();
+  // render ulang tombol
+  setTimeout(initGoogleLogin, 300);
+}
+
+function initGoogleLogin(){
+  try{
+    if(typeof google==='undefined' || !google.accounts || !google.accounts.id){
+      setTimeout(initGoogleLogin, 800);
+      return;
+    }
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCredential,
+      auto_select: true,
+      cancel_on_tap_outside: false
+    });
+    const btnParent = document.getElementById('googleLoginBox');
+    if(btnParent){
+      btnParent.innerHTML = '';
+      google.accounts.id.renderButton(btnParent, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        width: 280
+      });
+    }
+    // One Tap - muncul otomatis saat checkout dibuka pertama kali
+    // Jangan langsung prompt di load, tunggu checkout dibuka biar gak ganggu
+    updateGoogleUI();
+  }catch(e){ console.log('init google fail', e); }
+}
+
+// Trigger One Tap hanya saat checkout dibuka dan belum login
+const _origOpenCheckoutForGoogle = window.openCheckout;
+if(typeof _origOpenCheckoutForGoogle!=='undefined'){
+  // akan di override nanti setelah fungsi didefinisikan, pakai observer di openCheckout
+}
+
+// Saat halaman siap
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(initGoogleLogin, 1200);
+  setTimeout(updateGoogleUI, 1500);
+});
+
+// Hook ke openCheckout yang sudah ada
+(function(){
+  const originalOpen = window.openCheckout;
+  window.openCheckout = function(){
+    if(typeof originalOpen==='function') originalOpen.apply(this, arguments);
+    setTimeout(()=>{
+      updateGoogleUI();
+      try{
+        const saved = JSON.parse(localStorage.getItem('npw_google_profile')||'null');
+        if(!saved){
+          // belum login, tampilkan One Tap
+          google.accounts.id.prompt((notification)=>{
+            // jika dismissed, diamkan
+          });
+        }
+      }catch(e){}
+    }, 600);
+  };
+})();
+
+// Saat autofill dari history, juga update UI google
+const _origAutofill = window.autofillCustomerFromHistory;
+if(typeof _origAutofill==='function'){
+  window.autofillCustomerFromHistory = function(){
+    try{ _origAutofill.apply(this, arguments); }catch(e){}
+    updateGoogleUI();
+  };
+}
 
 
 // === AUTO REFRESH BACKGROUND - MENU SELALU UPDATE TANPA GANGGU CUSTOMER ===
