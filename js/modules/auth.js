@@ -4,7 +4,7 @@
 export function initGoogleAuth() {
   if (window.google?.accounts?.id) {
     window.google.accounts.id.initialize({
-      client_id: "831922896501-o46m51i98g921o49l4o1q2k3k21.apps.googleusercontent.com",
+      client_id: "783222505177-p7ite7jetiathok0fl927tsmu5m0ae0m.apps.googleusercontent.com",
       callback: handleGoogleResponse
     });
     
