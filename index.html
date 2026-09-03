@@ -1,1258 +1,273 @@
 <!DOCTYPE html>
 <html lang="id">
-<head><style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) {
-  font-family: "Optimistic", system-ui, sans-serif;
-}
-:where(code, pre, kbd, samp) {
-  font-family: "Optimistic Mono", ui-monospace, monospace;
-}
-</style>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nasgor Pak W - Official Warung Online V8.1 </title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
-<meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#FF6B2B">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<meta name="color-scheme" content="light dark">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-:root{
-  color-scheme: light dark;
-  --bg:#0A0A0A;
-  --bg-soft:#1A1A1A;
-  --bg-input:#0F0F0F;
-  --bg-blur:rgba(10,10,10,0.9);
-  --text:#ffffff;
-  --text-muted:rgba(255,255,255,0.5);
-  --text-soft:rgba(255,255,255,0.7);
-  --border:rgba(255,255,255,0.08);
-  --border-strong:rgba(255,255,255,0.10);
-  --card-shadow:none;
-}
-@media (prefers-color-scheme: light){
-  :root{
-    --bg:#F6F3EE;
-    --bg-soft:#FFFFFF;
-    --bg-input:#FFFFFF;
-    --bg-blur:rgba(246,243,238,0.9);
-    --text:#111111;
-    --text-muted:rgba(17,17,17,0.5);
-    --text-soft:rgba(17,17,17,0.7);
-    --border:rgba(17,17,17,0.08);
-    --border-strong:rgba(17,17,17,0.12);
-    --card-shadow:0 4px 24px rgba(0,0,0,0.06);
-  }
-}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);transition: background-color .25s, color .25s}
-.card-menu{background:var(--bg-soft);border:1px solid var(--border);box-shadow:var(--card-shadow);transition: background-color .25s, border-color .25s}
-.card-menu.soldout{opacity:0.5;pointer-events:none}
-#detailModal .relative{padding-bottom:0 !important;}
-#cartBar{padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)) !important;}
-
-  /* Manual theme override via data-theme */
-  :root[data-theme="light"]{
-    --bg:#F6F3EE;
-    --bg-soft:#FFFFFF;
-    --bg-input:#FFFFFF;
-    --bg-blur:rgba(246,243,238,0.9);
-    --text:#111111;
-    --text-muted:rgba(17,17,17,0.5);
-    --text-soft:rgba(17,17,17,0.7);
-    --border:rgba(17,17,17,0.08);
-    --border-strong:rgba(17,17,17,0.12);
-    --card-shadow:0 4px 24px rgba(0,0,0,0.06);
-  }
-  :root[data-theme="dark"]{
-    --bg:#0A0A0A;
-    --bg-soft:#1A1A1A;
-    --bg-input:#0F0F0F;
-    --bg-blur:rgba(10,10,10,0.9);
-    --text:#ffffff;
-    --text-muted:rgba(255,255,255,0.5);
-    --text-soft:rgba(255,255,255,0.7);
-    --border:rgba(255,255,255,0.08);
-    --border-strong:rgba(255,255,255,0.10);
-    --card-shadow:none;
-  }
-  #themeToggle{
-    transition: transform .15s;
-  }
-  #themeToggle:active{ transform:scale(0.9); }
-
-  /* theme adaptive helpers */
-.bg-theme{ background:var(--bg) !important; }
-.bg-theme-soft{ background:var(--bg-soft) !important; }
-.bg-theme-input{ background:var(--bg-input) !important; }
-.border-theme{ border-color:var(--border) !important; }
-.border-theme-strong{ border-color:var(--border-strong) !important; }
-.text-theme{ color:var(--text) !important; }
-.text-muted{ color:var(--text-muted) !important; }
-
-#categoryTabs{-ms-overflow-style:none;scrollbar-width:none;}
-#categoryTabs::-webkit-scrollbar{display:none;}
-.cat-tab{white-space:nowrap;border-radius:9999px;padding:10px 18px;font-size:12px;font-weight:700;background:var(--bg-soft);border:1px solid var(--border);color:var(--text-soft);cursor:pointer;transition:.2s;}
-.cat-tab.active-cat{background:#FF6B2B!important;color:#fff!important;border-color:#FF6B2B!important;box-shadow:0 4px 14px rgba(255,107,43,.35);}
-</style>
-
-<style>
-#splashScreen{
-  position:fixed; inset:0; z-index:9999;
-  background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  transition: opacity 0.5s ease, visibility 0.5s;
-}
-#splashScreen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
-.splash-logo{
-  width:96px; height:96px; border-radius:28px;
-  background: linear-gradient(135deg,#FF6B2B 0%,#FF8C42 100%);
-  display:flex; align-items:center; justify-content:center;
-  font-size:48px; box-shadow:0 12px 32px rgba(255,107,43,0.4);
-  animation: splashPulse 1.2s ease-in-out infinite;
-}
-@keyframes splashPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.05); } }
-.splash-title{ margin-top:20px; font-weight:800; font-size:20px; letter-spacing:-0.5px; }
-.splash-sub{ margin-top:6px; font-size:11px; opacity:0.5; letter-spacing:1px; text-transform:uppercase; }
-.splash-loader{ margin-top:24px; width:32px; height:32px; border:3px solid rgba(255,255,255,0.1); border-top-color:#FF6B2B; border-radius:50%; animation: spin 0.8s linear infinite; }
-@keyframes spin{ to{ transform:rotate(360deg); } }
-
-#categoryTabs{-ms-overflow-style:none;scrollbar-width:none;}
-#categoryTabs::-webkit-scrollbar{display:none;}
-.cat-tab{white-space:nowrap;border-radius:9999px;padding:10px 18px;font-size:12px;font-weight:700;background:var(--bg-soft);border:1px solid var(--border);color:var(--text-soft);cursor:pointer;transition:.2s;}
-.cat-tab.active-cat{background:#FF6B2B!important;color:#fff!important;border-color:#FF6B2B!important;box-shadow:0 4px 14px rgba(255,107,43,.35);}
-</style>
-
-<style id="theme-adaptive">
-/* Header & Blur */
-.sticky.top-0{ background:var(--bg-blur) !important; border-color:var(--border) !important; }
-/* Cards / Banners that used #1A1A1A / #0F0F0F */
-.bg-\[\#1A1A1A\]{ background:var(--bg-soft) !important; }
-.bg-\[\#0F0F0F\]{ background:var(--bg-input) !important; }
-.bg-\[\#0A0A0A\]\/90{ background:var(--bg-blur) !important; }
-.border-white\/\[0\.08\]{ border-color:var(--border) !important; }
-.border-white\/10{ border-color:var(--border-strong) !important; }
-.bg-white\/10{ background:rgba(128,128,128,0.12) !important; }
-@media (prefers-color-scheme: light){
-  .bg-white\/10{ background:rgba(0,0,0,0.06) !important; }
-  .bg-black\/70{ background:rgba(0,0,0,0.35) !important; }
-  .text-white{ color:var(--text) !important; }
-}
-/* keep splash loader border visible in light */
-@media (prefers-color-scheme: light){
-  .splash-loader{ border-color:rgba(0,0,0,0.1); border-top-color:#FF6B2B; }
-}
-/* cartBar & modals */
-#cartBar{ background:var(--bg-soft) !important; border-color:var(--border) !important; }
-#detailModal .bg-\[\#1A1A1A\], #checkoutModal .bg-\[\#1A1A1A\], #historyModal .bg-\[\#1A1A1A\]{ background:var(--bg-soft) !important; }
-#detailModal, #checkoutModal, #historyModal{ color:var(--text); }
-/* inputs */
-input, textarea, select{ background:var(--bg-input) !important; color:var(--text) !important; border-color:var(--border) !important; }
-input::placeholder, textarea::placeholder{ color:var(--text-muted) !important; }
-
-  /* Fix opsi varian & pedas di mode terang */
-  .opt-btn{
-    transition: all .2s ease;
-  }
-  .opt-btn.is-selected{
-    background: var(--text) !important;
-    color: var(--bg) !important;
-    border-color: var(--text) !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-  }
-  .opt-btn.is-unselected{
-    background: var(--bg-input) !important;
-    color: var(--text) !important;
-    border-color: var(--border-strong) !important;
-  }
-  .opt-btn.is-unselected:hover{
-    border-color: var(--text) !important;
-    opacity:0.9;
-  }
-  /* light mode khusus biar kontras lebih jelas */
-  :root[data-theme="light"] .opt-btn.is-selected,
-  @media (prefers-color-scheme: light){
-    :root:not([data-theme="dark"]) .opt-btn.is-selected{
-      background:#111 !important;
-      color:#fff !important;
-      border-color:#111 !important;
-    }
-  }
-
-  /* keep primary orange buttons */
-.bg-\[\#FF6B2B\]{ color:#fff !important; }
-
-#categoryTabs{-ms-overflow-style:none;scrollbar-width:none;}
-#categoryTabs::-webkit-scrollbar{display:none;}
-.cat-tab{white-space:nowrap;border-radius:9999px;padding:10px 18px;font-size:12px;font-weight:700;background:var(--bg-soft);border:1px solid var(--border);color:var(--text-soft);cursor:pointer;transition:.2s;}
-.cat-tab.active-cat{background:#FF6B2B!important;color:#fff!important;border-color:#FF6B2B!important;box-shadow:0 4px 14px rgba(255,107,43,.35);}
-</style>
-
-
-
-<style>
-/* FIX ONLY: google button tidak melebar keluar */
-#googleLoginWrapper{overflow:hidden; position:relative; max-width:100%; box-sizing:border-box;}
-#googleLoginBox{width:100% !important; max-width:100% !important; overflow:hidden !important; display:flex !important; justify-content:center; border-radius:12px;}
-#googleLoginBox > div{width:100% !important; max-width:100% !important;}
-#googleLoginBox iframe{width:100% !important; max-width:100% !important; border-radius:12px !important; display:block;}
-</style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nasgor Pak W - Official Warung Online V8.1</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A0A0A" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#FF6B2B">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta name="color-scheme" content="light dark">
+  
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="pb-36">
 
-<div id="splashScreen">
-  <div class="splash-logo">🔥</div>
-  <div class="splash-title">Nasgor Pak W</div>
-  <div class="splash-sub">Official Warung Online </div>
-  <div class="splash-loader"></div>
-</div>
-
-<div class="sticky top-0 z-30 backdrop-blur-xl bg-[#0A0A0A]/90 border-b border-white/[0.08]">
-<div class="max-w-[480px] mx-auto px-4 py-3.5 flex justify-between items-center">
-<div class="flex items-center gap-3 min-w-0">
-<div class="w-11 h-11 rounded-[14px] bg-gradient-to-br from-[#FF6B2B] to-[#FF8C42] flex items-center justify-center text-[20px] shadow-[0_4px_16px_rgba(255,107,43,0.3)] shrink-0">🔥</div>
-<div class="min-w-0"><h1 class="text-[16px] font-extrabold leading-tight">Nasgor Pak W</h1><div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] opacity-50">Official Warung Online </span></div></div>
-</div>
-<div class="flex gap-2 items-center shrink-0">
-<button id="themeToggle" onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-[14px]" title="Ganti tema">🌙</button>
-<button onclick="openHistory()" class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">🕘</button>
-<button id="installBtn" class="hidden px-3 py-2 rounded-full bg-[#FF6B2B] text-[11px] font-bold">Install</button>
-</div>
-</div>
-</div>
-
-<div class="max-w-[480px] mx-auto px-4 pt-4 pb-6">
-<div class="hidden"><a id="warungMapsLink" href="https://www.google.com/maps?q=-8.0959324,111.6350933"></a><span id="warungCoordText"></span></div>
-
-<div class="rounded-[16px] bg-[#1A1A1A] border border-[#FF6B2B]/20 p-3.5 flex gap-3 items-center">
-<div class="w-10 h-10 rounded-full bg-[#FF6B2B]/20 flex items-center justify-center shrink-0">⏰</div>
-<div class="flex-1 min-w-0"><div class="text-[12px] font-bold">Pre-Order untuk nanti?</div><div class="text-[11px] opacity-50">Pesan siang, kirim malam • Radius <span id="radiusText">10</span>km • &lt;<span id="freeText">500</span>m Gratis</div></div>
-<select id="preorderSlot" class="rounded-full bg-[#0F0F0F] border border-white/10 px-3 py-2 text-[11px] shrink-0"><option value="">Sekarang</option><option value="17:00">17:00</option><option value="17:30">17:30</option><option value="18:00">18:00</option><option value="18:30">18:30</option><option value="19:00">19:00</option><option value="19:30">19:30</option><option value="20:00">20:00</option><option value="20:30">20:30</option><option value="21:00">21:00</option></select>
-</div>
-
-<div id="warungClosedBanner" class="hidden mt-4 rounded-[18px] border-2 p-4 bg-red-500/10 border-red-500/20">
-<div class="flex gap-3"><div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-[22px] shrink-0">🔴</div><div class="flex-1"><div class="font-extrabold text-[14px]">Warung Tutup</div><div id="warungClosedMessage" class="text-[12px] opacity-80 mt-1"></div><div id="warungClosedTime" class="text-[10px] opacity-50 mt-1"></div></div></div>
-<div class="mt-3 flex gap-2"><button onclick="document.getElementById('preorderSlot').focus()" class="rounded-full bg-white text-black px-4 py-2 text-[11px] font-bold">⏰ Pre-Order</button><a id="warungClosedWa" href="https://wa.me/6282296728478" target="_blank" class="rounded-full bg-white/10 border border-white/10 px-4 py-2 text-[11px] font-bold">💬 Tanya Admin</a></div>
-</div>
-<div id="warungOpenBanner" class="hidden mt-4 rounded-[16px] bg-[#22c55e]/10 border border-[#22c55e]/20 p-3 flex gap-3 items-center"><div class="w-8 h-8 rounded-full bg-[#22c55e]/20 flex items-center justify-center">🟢</div><div class="flex-1"><div class="text-[12px] font-bold text-[#22c55e]">Warung Buka</div><div id="warungOpenInfo" class="text-[11px] opacity-70"></div></div></div>
-
-<div id="categoryTabs" class="mt-5 flex gap-2 overflow-x-auto pb-2">
-  <button data-cat="all" onclick="filterKategori('all')" class="cat-tab active-cat" type="button">🔥 Semua</button>
-  <button data-cat="makanan" onclick="filterKategori('makanan')" class="cat-tab" type="button">🍛 Makanan</button>
-  <button data-cat="minuman" onclick="filterKategori('minuman')" class="cat-tab" type="button">🥤 Minuman</button>
-  <button data-cat="camilan" onclick="filterKategori('camilan')" class="cat-tab" type="button">🍟 Camilan</button>
-</div>
-<div id="categoryInfo" class="mt-1 text-[11px] opacity-60"></div>
-<div id="loading" class="mt-6 text-center opacity-50 text-[12px]">Memuat menu real...</div>
-<div id="menuGrid" class="mt-6 grid grid-cols-2 gap-3"></div>
-</div>
-
-<div id="cartBar" class="fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1A] border-t border-white/10 p-3 hidden">
-<div class="max-w-[480px] mx-auto flex justify-between items-center">
-<div class="flex items-center gap-3"><div id="cartCount" class="w-10 h-10 rounded-full bg-[#FF6B2B] flex items-center justify-center font-bold">0</div><div><div id="cartItems" class="text-[12px] opacity-50">0 menu</div><div id="cartTotal" class="font-bold">Rp 0</div></div></div>
-<button onclick="openCheckout()" class="rounded-full bg-white text-black px-6 py-3 font-bold">Checkout</button>
-</div></div>
-
-<div id="addToast" class="hidden fixed bottom-[88px] left-1/2 -translate-x-1/2 z-[60] bg-white text-black px-5 py-3 rounded-full text-[12px] font-bold shadow-[0_8px_24px_rgba(0,0,0,0.4)] items-center gap-2">✅ Masuk keranjang</div>
-
-<div id="detailModal" class="fixed inset-0 z-50 hidden">
-<div class="absolute inset-0 bg-black/70" onclick="closeDetail()"></div>
-<div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-10 mx-auto max-w-[480px] p-5 max-h-[90vh] overflow-auto pb-0">
-<button onclick="closeDetail()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white text-black">✕</button>
-<div class="flex gap-4"><div id="detailEmoji" class="w-[84px] h-[84px] rounded-[18px] flex items-center justify-center text-[42px] bg-gradient-to-br from-[#FF6B2B] to-[#FF8C42]"></div><div><div id="detailName" class="font-bold text-[18px]"></div><div id="detailDesc" class="text-[12px] opacity-50"></div><div id="detailStock" class="mt-1 text-[11px]"></div></div></div>
-<div id="variantBox" class="mt-6 hidden"><div class="text-[11px] opacity-50 font-bold">VARIASI - HARGA JADI</div><div id="variantList" class="mt-2 grid grid-cols-2 gap-2"></div></div>
-<div class="mt-6"><div class="text-[11px] opacity-50 font-bold">LEVEL PEDAS</div><div id="pedasList" class="mt-2 grid grid-cols-3 gap-2"></div></div>
-<div class="mt-6"><div class="text-[11px] opacity-50 font-bold">ADDON / TOPPING</div><div id="addonList" class="mt-2 space-y-2"></div></div>
-<div id="customRequestBox" class="mt-6"><div class="text-[11px] opacity-50 font-bold">CUSTOM REQUEST (Opsional)</div><textarea id="customRequest" placeholder="Contoh: tanpa bawang, pedasnya dipisah..." class="mt-2 w-full rounded-[14px] bg-[#0F0F0F] border border-white/10 px-4 py-3 text-[12px] outline-none min-h-[60px]" maxlength="200"></textarea><div class="mt-1 text-[10px] opacity-40 text-right"><span id="customRequestCount">0</span>/200</div></div>
-<div class="mt-6 flex justify-between items-center"><div class="flex items-center gap-3"><button onclick="changeDetailQty(-1)" class="w-9 h-9 rounded-full bg-white/10">-</button><span id="detailQty" class="font-bold">1</span><button onclick="changeDetailQty(1)" class="w-9 h-9 rounded-full bg-white text-black">+</button></div><div id="detailTotalPrice" class="font-extrabold text-[18px]">Rp 0</div></div>
-<div class="sticky bottom-0 left-0 right-0 bg-[#1A1A1A] pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] mt-4 -mx-5 px-5 border-t border-white/5"><button onclick="addToCart()" class="w-full rounded-full bg-white text-black py-4 font-bold">+ Keranjang • <span id="detailBtnTotal">Rp 0</span></button></div>
-</div></div>
-
-<div id="checkoutModal" class="fixed inset-0 z-50 hidden">
-<div class="absolute inset-0 bg-black/70" onclick="document.getElementById('checkoutModal').classList.add('hidden')"></div>
-<div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-10 mx-auto max-w-[480px] p-5 max-h-[92vh] overflow-auto">
-<div class="flex justify-between items-center"><h2 class="font-bold">Keranjang • <span id="modalCount">0</span></h2><button onclick="document.getElementById('checkoutModal').classList.add('hidden')" class="w-9 h-9 rounded-full bg-white text-black">✕</button></div>
-<div class="mt-4 space-y-3">
-
-<div id="googleLoginWrapper" class="rounded-[14px] bg-white/5 border border-white/10 p-3 mb-3 overflow-hidden" style="max-width:100%;box-sizing:border-box;">
-  <div class="flex justify-between items-center">
-    <div class="text-[11px] font-bold opacity-80">⚡ Isi otomatis dengan Google?</div>
-    <div id="googleLoginStatus" class="text-[10px] opacity-50">Opsional</div>
+  <!-- Splash Screen -->
+  <div id="splashScreen">
+    <div class="splash-logo">🔥</div>
+    <div class="splash-title">Nasgor Pak W</div>
+    <div class="splash-sub">Official Warung Online</div>
+    <div class="splash-loader"></div>
   </div>
-  <div id="googleLoginBox" class="mt-2.5 w-full max-w-full overflow-hidden rounded-[12px] flex justify-center bg-white" style="max-width:100%;"></div>
-  <div id="googleProfileBox" class="hidden mt-2 flex items-center gap-2.5">
-    <img id="googlePic" src="" class="w-8 h-8 rounded-full bg-white/10"/>
-    <div class="flex-1 min-w-0">
-      <div id="googleName" class="text-[12px] font-bold truncate"></div>
-      <div id="googleEmail" class="text-[10px] opacity-50 truncate"></div>
+
+  <!-- Header -->
+  <div class="sticky top-0 z-30 backdrop-blur-xl bg-[#0A0A0A]/90 border-b border-white/[0.08]">
+    <div class="max-w-[480px] mx-auto px-4 py-3.5 flex justify-between items-center">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-11 h-11 rounded-[14px] bg-gradient-to-br from-[#FF6B2B] to-[#FF8C42] flex items-center justify-center text-[20px] shadow-[0_4px_16px_rgba(255,107,43,0.3)] shrink-0">🔥</div>
+        <div class="min-w-0">
+          <h1 class="text-[16px] font-extrabold leading-tight">Nasgor Pak W</h1>
+          <div class="flex items-center gap-1.5 mt-0.5"><span class="text-[10px] opacity-50">Official Warung Online</span></div>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center shrink-0">
+        <button id="themeToggle" class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-[14px]" title="Ganti tema">🌙</button>
+        <button id="btnHistory" class="w-9 h-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center">🕘</button>
+        <button id="installBtn" class="hidden px-3 py-2 rounded-full bg-[#FF6B2B] text-[11px] font-bold">Install</button>
+      </div>
     </div>
-    <button onclick="googleLogout()" class="text-[10px] px-3 py-1.5 rounded-full bg-white/10 border border-white/10 font-bold">Ganti</button>
   </div>
 
-</div>
-<input id="custName"
- placeholder="Nama *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
-<input id="custPhone" placeholder="HP WA *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
-<textarea id="custAddr" placeholder="Alamat lengkap (Patokan) *" class="w-full rounded-[18px] bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none min-h-[70px]"></textarea>
-<div class="rounded-[16px] bg-[#0F0F0F] border border-[#22c55e]/20 p-3">
-<div class="flex items-center justify-between"><div class="text-[11px] font-bold">📍 Lokasi Antar * <span id="gpsLockStatus" class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">Belum Kunci</span></div><div id="gpsStatusDot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div></div>
-<div class="mt-2.5 flex gap-2">
-<input id="custMaps" placeholder="Mendeteksi lokasi otomatis..." class="flex-1 rounded-full bg-[#0A0A0A] border border-white/10 px-4 py-3 text-[12px] font-mono outline-none">
-<button onclick="getGPS()" id="btnGPS" class="rounded-full bg-[#FF6B2B] px-4 py-3 text-[11px] font-bold shrink-0">📍 GPS</button>
-</div>
-<div class="mt-2 flex gap-2">
-<button onclick="toggleLockMap()" id="btnLock" class="flex-1 rounded-full bg-white/10 border border-white/10 py-2.5 text-[11px] font-bold">🔓 Kunci & Validasi</button>
-<span id="gpsMiniInfo" class="flex-1 text-[10px] opacity-50 py-2">Auto deteksi lokasi</span>
-</div>
-</div>
-</div>
-<div id="cartList" class="mt-6 space-y-3"></div>
-<div class="mt-6 rounded-[20px] bg-[#0F0F0F] border border-white/10 p-4 space-y-2">
-<div class="flex justify-between text-[13px] opacity-50"><span>Subtotal</span><span id="subtotalVal">Rp 0</span></div>
-<div class="flex justify-between text-[13px]"><span>Ongkir (presisi GPS)</span><span id="ongkirVal" class="font-bold">Belum ada GPS</span></div>
-<div id="ongkirNote" class="text-[11px] opacity-50">Klik GPS → Kunci hijau wajib untuk COD</div>
-<div class="flex justify-between font-bold text-[16px] pt-2 border-t border-white/10 mt-2"><span>Total Bayar</span><span id="totalVal">Rp 0</span></div>
-</div>
+  <!-- Main Container -->
+  <div class="max-w-[480px] mx-auto px-4 pt-4 pb-6">
+    <div class="hidden">
+      <a id="warungMapsLink" href="https://www.google.com/maps?q=-8.0959324,111.6350933"></a>
+      <span id="warungCoordText"></span>
+    </div>
 
+    <!-- Pre-Order Widget -->
+    <div class="rounded-[16px] bg-[#1A1A1A] border border-[#FF6B2B]/20 p-3.5 flex gap-3 items-center">
+      <div class="w-10 h-10 rounded-full bg-[#FF6B2B]/20 flex items-center justify-center shrink-0">⏰</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-[12px] font-bold">Pre-Order untuk nanti?</div>
+        <div class="text-[11px] opacity-50">Pesan siang, kirim malam • Radius <span id="radiusText">10</span>km • &lt;<span id="freeText">500</span>m Gratis</div>
+      </div>
+      <select id="preorderSlot" class="rounded-full bg-[#0F0F0F] border border-white/10 px-3 py-2 text-[11px] shrink-0">
+        <option value="">Sekarang</option>
+        <option value="17:00">17:00</option>
+        <option value="17:30">17:30</option>
+        <option value="18:00">18:00</option>
+        <option value="18:30">18:30</option>
+        <option value="19:00">19:00</option>
+        <option value="19:30">19:30</option>
+        <option value="20:00">20:00</option>
+        <option value="20:30">20:30</option>
+        <option value="21:00">21:00</option>
+      </select>
+    </div>
 
-<div class="mt-4 space-y-2.5">
-<button id="btnBayarCOD" onclick="bayar('cod')" class="w-full rounded-full bg-white text-black py-4 font-bold text-[15px] border border-white disabled:opacity-40 disabled:pointer-events-none">🚚 Bayar COD - Bayar di Tempat</button>
-<button onclick="bayar('pickup')" class="w-full rounded-full bg-white/10 border border-white/10 py-4 font-bold text-[15px]">🏪 Pickup / Ambil di Warung (Tanpa Ongkir)</button>
-</div>
-<div class="mt-3 text-[10px] opacity-40 text-center">Pickup boleh tanpa GPS • Delivery/COD wajib GPS terkunci & valid </div>
-</div></div>
+    <!-- Status Buka/Tutup Banners -->
+    <div id="warungClosedBanner" class="hidden mt-4 rounded-[18px] border-2 p-4 bg-red-500/10 border-red-500/20">
+      <div class="flex gap-3">
+        <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-[22px] shrink-0">🔴</div>
+        <div class="flex-1">
+          <div class="font-extrabold text-[14px]">Warung Tutup</div>
+          <div id="warungClosedMessage" class="text-[12px] opacity-80 mt-1"></div>
+          <div id="warungClosedTime" class="text-[10px] opacity-50 mt-1"></div>
+        </div>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button id="btnFocusPreorder" class="rounded-full bg-white text-black px-4 py-2 text-[11px] font-bold">⏰ Pre-Order</button>
+        <a id="warungClosedWa" href="https://wa.me/6282296728478" target="_blank" class="rounded-full bg-white/10 border border-white/10 px-4 py-2 text-[11px] font-bold">💬 Tanya Admin</a>
+      </div>
+    </div>
+    
+    <div id="warungOpenBanner" class="hidden mt-4 rounded-[16px] bg-[#22c55e]/10 border border-[#22c55e]/20 p-3 flex gap-3 items-center">
+      <div class="w-8 h-8 rounded-full bg-[#22c55e]/20 flex items-center justify-center">🟢</div>
+      <div class="flex-1">
+        <div class="text-[12px] font-bold text-[#22c55e]">Warung Buka</div>
+        <div id="warungOpenInfo" class="text-[11px] opacity-70"></div>
+      </div>
+    </div>
 
-<div id="paymentModal" class="fixed inset-0 z-[80] hidden">
-<div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closePaymentModal()"></div>
-<div class="relative mx-auto max-w-[480px] px-4 py-6 mt-2 max-h-[95vh] overflow-auto pb-28">
-<div class="rounded-[24px] bg-[#1A1A1A] border border-white/10 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
-<div class="flex justify-between items-center"><div id="payModalTitle" class="font-bold text-[16px]">KONFIRMASI PESANAN</div><button onclick="closePaymentModal()" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">✕</button></div>
-<div class="mt-2 text-[12px] opacity-60">Order ID: <span id="payOrderId" class="font-bold">-</span> • Total: <span id="payTotal" class="font-bold text-[#FF6B2B]">Rp 0</span></div>
-<div class="mt-4 rounded-[14px] bg-[#0F0F0F] border border-white/10 p-3 max-h-[220px] overflow-auto text-[11px] whitespace-pre-wrap leading-relaxed" id="payOrderDetail"></div>
-<div class="mt-4 grid grid-cols-2 gap-2"><button onclick="copyWA()" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📋 Copy Pesan</button><button onclick="openTracking()" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📦 Lacak Pesanan</button></div>
-<div class="mt-4"><a id="waLink" href="#" onclick="return handleWAConfirm(event)" class="block w-full text-center rounded-full bg-[#25D366] text-black py-4 font-bold text-[15px] shadow-[0_4px_16px_rgba(37,211,102,0.4)]">📲 Konfirmasi WA</a></div>
-<div class="mt-3 text-[10px] opacity-40 text-center">Pesanan disimpan ke database • WA admin otomatis terbuka</div>
-</div></div></div>
+    <!-- Kategori Tabs -->
+    <div id="categoryTabs" class="mt-5 flex gap-2 overflow-x-auto pb-2">
+      <button data-cat="all" class="cat-tab active-cat" type="button">🔥 Semua</button>
+      <button data-cat="makanan" class="cat-tab" type="button">🍛 Makanan</button>
+      <button data-cat="minuman" class="cat-tab" type="button">🥤 Minuman</button>
+      <button data-cat="camilan" class="cat-tab" type="button">🍟 Camilan</button>
+    </div>
+    <div id="categoryInfo" class="mt-1 text-[11px] opacity-60"></div>
+    <div id="loading" class="mt-6 text-center opacity-50 text-[12px]">Memuat menu real...</div>
+    <div id="menuGrid" class="mt-6 grid grid-cols-2 gap-3"></div>
+  </div>
 
-<div id="historyModal" class="fixed inset-0 z-50 hidden">
-<div class="absolute inset-0 bg-black/70" onclick="document.getElementById('historyModal').classList.add('hidden')"></div>
-<div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-20 mx-auto max-w-[480px] p-5 max-h-[80vh] overflow-auto"><div class="flex justify-between"><h2 class="font-bold">Riwayat</h2><button onclick="document.getElementById('historyModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white text-black">✕</button></div><div id="historyHeader" class="mb-3 text-[12px] font-bold"></div><div id="historyList" class="mt-4 space-y-2"></div></div></div>
+  <!-- Cart Bar Sticky -->
+  <div id="cartBar" class="fixed bottom-0 left-0 right-0 z-40 bg-[#1A1A1A] border-t border-white/10 p-3 hidden">
+    <div class="max-w-[480px] mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div id="cartCount" class="w-10 h-10 rounded-full bg-[#FF6B2B] flex items-center justify-center font-bold">0</div>
+        <div>
+          <div id="cartItems" class="text-[12px] opacity-50">0 menu</div>
+          <div id="cartTotal" class="font-bold">Rp 0</div>
+        </div>
+      </div>
+      <button id="btnOpenCheckout" class="rounded-full bg-white text-black px-6 py-3 font-bold">Checkout</button>
+    </div>
+  </div>
 
-<script>
-const API_BASE = (localStorage.getItem('api_base') || 'https://nasgor-v2.welybudiprasetya.workers.dev').trim().replace(/\/$/,'');
-const WARUNG = {lat: -8.0959324, lng: 111.6350933, name: "Warung Nasgor Pak W", maps: "https://www.google.com/maps?q=-8.0959324,111.6350933"};
-let WARUNG_CONFIG = null;
-let mapLocked = false; let gpsValidated = false; let mapValidated = false; let lastValidCoords=null;
-let curOngkir=0, curJarak=0;
-let WARUNG_IS_OPEN=true; let WARUNG_CLOSED_MSG="Warung tutup";
+  <!-- Toast Added -->
+  <div id="addToast" class="hidden fixed bottom-[88px] left-1/2 -translate-x-1/2 z-[60] bg-white text-black px-5 py-3 rounded-full text-[12px] font-bold shadow-[0_8px_24px_rgba(0,0,0,0.4)] items-center gap-2">✅ Masuk keranjang</div>
 
-async function fetchWarungConfig(){
-  try{
-    const r=await fetch(API_BASE+'/api/settings',{cache:'no-store'});
-    if(r.ok){
-      const cfg=await r.json();
-      WARUNG_CONFIG=cfg;
-      if(cfg.lat) WARUNG.lat=cfg.lat; if(cfg.lng) WARUNG.lng=cfg.lng; if(cfg.maps) WARUNG.maps=cfg.maps; if(cfg.name) WARUNG.name=cfg.name;
-      WARUNG_IS_OPEN = cfg.is_open!==false; WARUNG_CLOSED_MSG = cfg.closed_message||"Warung tutup";
-      document.getElementById('radiusText').textContent=cfg.max_radius_km||10;
-      document.getElementById('freeText').textContent=(cfg.free_radius_km||0.5)*1000;
-      document.getElementById('warungMapsLink').href=cfg.maps;
-      localStorage.setItem('warung_config', JSON.stringify(cfg));
-      updateWarungOpenUI(cfg); return cfg;
-    }
-  }catch(e){ console.log('config fail',e); }
-  try{
-    const cached=JSON.parse(localStorage.getItem('warung_config')||'null');
-    if(cached){ WARUNG_CONFIG=cached; WARUNG.lat=cached.lat||WARUNG.lat; WARUNG.lng=cached.lng||WARUNG.lng; WARUNG_IS_OPEN=cached.is_open!==false; WARUNG_CLOSED_MSG=cached.closed_message||WARUNG_CLOSED_MSG; updateWarungOpenUI(cached); return cached; }
-  }catch{}
-  updateWarungOpenUI({is_open:true, open_time:'17:00', close_time:'22:00', closed_message:WARUNG_CLOSED_MSG});
-  return WARUNG;
-}
-function updateWarungOpenUI(cfg){
-  const closedBanner=document.getElementById('warungClosedBanner'); const openBanner=document.getElementById('warungOpenBanner');
-  const closedMsg=document.getElementById('warungClosedMessage'); const closedTime=document.getElementById('warungClosedTime'); const openInfo=document.getElementById('warungOpenInfo');
-  if(!cfg) return;
-  const isOpen=cfg.is_open!==false;
-  if(isOpen){ closedBanner.classList.add('hidden'); openBanner.classList.remove('hidden'); openInfo.textContent=`Buka ${cfg.open_time||'17:00'}-${cfg.close_time||'22:00'} • Bisa order`; }
-  else { closedBanner.classList.remove('hidden'); openBanner.classList.add('hidden'); closedMsg.textContent=cfg.closed_message||WARUNG_CLOSED_MSG; closedTime.textContent=`Jam buka: ${cfg.open_time||'17:00'}-${cfg.close_time||'22:00'} WIB`; }
-  WARUNG_IS_OPEN=isOpen;
-}
+  <!-- Detail Modal -->
+  <div id="detailModal" class="fixed inset-0 z-50 hidden">
+    <div id="detailOverlay" class="absolute inset-0 bg-black/70"></div>
+    <div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-10 mx-auto max-w-[480px] p-5 max-h-[90vh] overflow-auto pb-0">
+      <button id="btnCloseDetail" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white text-black">✕</button>
+      <div class="flex gap-4">
+        <div id="detailEmoji" class="w-[84px] h-[84px] rounded-[18px] flex items-center justify-center text-[42px] bg-gradient-to-br from-[#FF6B2B] to-[#FF8C42]"></div>
+        <div>
+          <div id="detailName" class="font-bold text-[18px]"></div>
+          <div id="detailDesc" class="text-[12px] opacity-50"></div>
+          <div id="detailStock" class="mt-1 text-[11px]"></div>
+        </div>
+      </div>
+      <div id="variantBox" class="mt-6 hidden">
+        <div class="text-[11px] opacity-50 font-bold">VARIASI - HARGA JADI</div>
+        <div id="variantList" class="mt-2 grid grid-cols-2 gap-2"></div>
+      </div>
+      <div class="mt-6">
+        <div class="text-[11px] opacity-50 font-bold">LEVEL PEDAS</div>
+        <div id="pedasList" class="mt-2 grid grid-cols-3 gap-2"></div>
+      </div>
+      <div class="mt-6">
+        <div class="text-[11px] opacity-50 font-bold">ADDON / TOPPING</div>
+        <div id="addonList" class="mt-2 space-y-2"></div>
+      </div>
+      <div id="customRequestBox" class="mt-6">
+        <div class="text-[11px] opacity-50 font-bold">CUSTOM REQUEST (Opsional)</div>
+        <textarea id="customRequest" placeholder="Contoh: tanpa bawang, pedasnya dipisah..." class="mt-2 w-full rounded-[14px] bg-[#0F0F0F] border border-white/10 px-4 py-3 text-[12px] outline-none min-h-[60px]" maxlength="200"></textarea>
+        <div class="mt-1 text-[10px] opacity-40 text-right"><span id="customRequestCount">0</span>/200</div>
+      </div>
+      <div class="mt-6 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <button id="btnQtyDec" class="w-9 h-9 rounded-full bg-white/10">-</button>
+          <span id="detailQty" class="font-bold">1</span>
+          <button id="btnQtyInc" class="w-9 h-9 rounded-full bg-white text-black">+</button>
+        </div>
+        <div id="detailTotalPrice" class="font-extrabold text-[18px]">Rp 0</div>
+      </div>
+      <div class="sticky bottom-0 left-0 right-0 bg-[#1A1A1A] pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] mt-4 -mx-5 px-5 border-t border-white/5">
+        <button id="btnAddToCart" class="w-full rounded-full bg-white text-black py-4 font-bold">+ Keranjang • <span id="detailBtnTotal">Rp 0</span></button>
+      </div>
+    </div>
+  </div>
 
-function getEmojiForMenu(name, category){
-  const n=(name||'').toLowerCase(); const c=(category||'').toLowerCase();
-  if(n.includes('nasi goreng')) return '🍛'; if(n.includes('mie')) return '🍜'; if(n.includes('ayam')) return '🍗'; if(c==='minuman') return '🥤'; return '🍛';
-}
-function fmt(n){ return 'Rp '+Number(n||0).toLocaleString('id-ID'); }
-function parseLatLng(input){
-  if(!input) return null;
-  let m=String(input).match(/(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)/); if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])};
-  m=String(input).match(/@(-?\d+\.\d+),(-?\d+\.\d+)/); if(m) return {lat:parseFloat(m[1]), lng:parseFloat(m[2])}; return null;
-}
-function haversine(lat1, lon1, lat2, lon2){
-  const R=6371; const dLat=(lat2-lat1)*Math.PI/180; const dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="fixed inset-0 z-50 hidden">
+    <div id="checkoutOverlay" class="absolute inset-0 bg-black/70"></div>
+    <div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-10 mx-auto max-w-[480px] p-5 max-h-[92vh] overflow-auto">
+      <div class="flex justify-between items-center">
+        <h2 class="font-bold">Keranjang • <span id="modalCount">0</span></h2>
+        <button id="btnCloseCheckout" class="w-9 h-9 rounded-full bg-white text-black">✕</button>
+      </div>
+      <div class="mt-4 space-y-3">
+        <!-- Google Login OAuth -->
+        <div id="googleLoginWrapper" class="rounded-[14px] bg-white/5 border border-white/10 p-3 mb-3">
+          <div class="flex justify-between items-center">
+            <div class="text-[11px] font-bold opacity-80">⚡ Isi otomatis dengan Google?</div>
+            <div id="googleLoginStatus" class="text-[10px] opacity-50">Opsional</div>
+          </div>
+          <div id="googleLoginBox" class="mt-2.5"></div>
+          <div id="googleProfileBox" class="hidden mt-2 flex items-center gap-2.5">
+            <img id="googlePic" src="" class="w-8 h-8 rounded-full bg-white/10"/>
+            <div class="flex-1 min-w-0">
+              <div id="googleName" class="text-[12px] font-bold truncate"></div>
+              <div id="googleEmail" class="text-[10px] opacity-50 truncate"></div>
+            </div>
+            <button id="btnGoogleLogout" class="text-[10px] px-3 py-1.5 rounded-full bg-white/10 border border-white/10 font-bold">Ganti</button>
+          </div>
+        </div>
 
-function toggleLockMap(){
-  if(!lastValidCoords){ alert('Klik GPS dulu untuk dapat koordinat valid'); return; }
-  mapLocked = !mapLocked; mapValidated = mapLocked; // sync real
-  checkMapValidationUI(); updateOngkir();
-}
-function checkMapValidationUI(){
-  const lockBtn=document.getElementById('btnLock'); const dot=document.getElementById('gpsStatusDot'); const lockStatus=document.getElementById('gpsLockStatus');
-  const codBtn=document.getElementById('btnBayarCOD');
-  if(mapLocked){
-    lockBtn.textContent='🔒 Terkunci Hijau ✓'; lockBtn.className='flex-1 rounded-full bg-[#22c55e] text-black py-2.5 text-[11px] font-bold';
-    dot.className='w-2 h-2 rounded-full bg-[#22c55e]'; lockStatus.textContent='Terkunci ✓'; lockStatus.className='ml-2 text-[10px] px-2 py-0.5 rounded-full bg-[#22c55e]/20 text-[#22c55e] font-bold';
-    if(codBtn){ codBtn.disabled=false; codBtn.classList.remove('opacity-40'); }
-  } else {
-    lockBtn.textContent='🔓 Kunci & Validasi'; lockBtn.className='flex-1 rounded-full bg-white/10 border border-white/10 py-2.5 text-[11px] font-bold';
-    dot.className='w-2 h-2 rounded-full bg-yellow-500 animate-pulse'; lockStatus.textContent='Belum Kunci'; lockStatus.className='ml-2 text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400';
-    if(curJarak>0 && document.getElementById('custMaps').value){ if(codBtn){ codBtn.disabled=true; } }
-  }
-}
-function updateOngkir(){
-  if(!WARUNG_CONFIG) return;
-  if(!lastValidCoords){ curOngkir=0; curJarak=0; document.getElementById('ongkirVal').textContent='Belum ada GPS'; document.getElementById('ongkirNote').textContent='Klik GPS dulu'; return; }
-  const dist=haversine(WARUNG.lat, WARUNG.lng, lastValidCoords.lat, lastValidCoords.lng);
-  curJarak=dist;
-  const freeR=Number(WARUNG_CONFIG.free_radius_km||0.5); const pricePer100=Number(WARUNG_CONFIG.price_per_100m||300);
-  let ongkir=0; if(dist>freeR){ const meters=dist*1000; const blocks=Math.ceil(meters/100); ongkir=blocks*pricePer100; }
-  curOngkir=ongkir;
-  document.getElementById('ongkirVal').textContent= ongkir===0? 'GRATIS 🎉' : fmt(ongkir) + ` (${dist.toFixed(2)}km)`;
-  document.getElementById('ongkirNote').textContent= dist>Number(WARUNG_CONFIG.max_radius_km||10) ? `⛔ Diluar radius ${WARUNG_CONFIG.max_radius_km}km - Pilih Pickup` : `Jarak ${dist.toFixed(3)}km • Rumus ceil(m/100)*${pricePer100}`;
-  const sub=cart.reduce((a,b)=>a+b.totalPrice,0); document.getElementById('subtotalVal').textContent=fmt(sub); document.getElementById('totalVal').textContent=fmt(sub+ongkir);
-}
+        <input id="custName" placeholder="Nama *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
+        <input id="custPhone" placeholder="HP WA *" class="w-full rounded-full bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none">
+        <textarea id="custAddr" placeholder="Alamat lengkap (Patokan) *" class="w-full rounded-[18px] bg-[#0F0F0F] border border-white/10 px-5 py-3 text-[13px] outline-none min-h-[70px]"></textarea>
+        
+        <div class="rounded-[16px] bg-[#0F0F0F] border border-[#22c55e]/20 p-3">
+          <div class="flex items-center justify-between">
+            <div class="text-[11px] font-bold">📍 Lokasi Antar * <span id="gpsLockStatus" class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400">Belum Kunci</span></div>
+            <div id="gpsStatusDot" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+          </div>
+          <div class="mt-2.5 flex gap-2">
+            <input id="custMaps" placeholder="Mendeteksi lokasi otomatis..." class="flex-1 rounded-full bg-[#0A0A0A] border border-white/10 px-4 py-3 text-[12px] font-mono outline-none">
+            <button id="btnGPS" class="rounded-full bg-[#FF6B2B] px-4 py-3 text-[11px] font-bold shrink-0">📍 GPS</button>
+          </div>
+          <div class="mt-2 flex gap-2">
+            <button id="btnLock" class="flex-1 rounded-full bg-white/10 border border-white/10 py-2.5 text-[11px] font-bold">🔓 Kunci & Validasi</button>
+            <span id="gpsMiniInfo" class="flex-1 text-[10px] opacity-50 py-2">Auto deteksi lokasi</span>
+          </div>
+        </div>
+      </div>
 
-let menus=[], cart=JSON.parse(localStorage.getItem('npw_cart')||'[]'), curDetail=null, curQty=1, curAddons={}, curVariant=null, curPedas=null, curOrderId=null;
+      <div id="cartList" class="mt-6 space-y-3"></div>
+      
+      <div class="mt-6 rounded-[20px] bg-[#0F0F0F] border border-white/10 p-4 space-y-2">
+        <div class="flex justify-between text-[13px] opacity-50"><span>Subtotal</span><span id="subtotalVal">Rp 0</span></div>
+        <div class="flex justify-between text-[13px]"><span>Ongkir (presisi GPS)</span><span id="ongkirVal" class="font-bold">Belum ada GPS</span></div>
+        <div id="ongkirNote" class="text-[11px] opacity-50">Klik GPS → Kunci hijau wajib untuk COD</div>
+        <div class="flex justify-between font-bold text-[16px] pt-2 border-t border-white/10 mt-2"><span>Total Bayar</span><span id="totalVal">Rp 0</span></div>
+      </div>
 
-async function loadMenu(){
-  try{
-    document.getElementById('loading').style.display='block';
-    const r=await fetch(API_BASE+'/api/menus',{cache:'no-store'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const data=await r.json(); 
-    // AUTO: yang habis / tidak aktif taruh di bawah, tanpa ubah urutan lainnya
-    function _isHabis(m){
-      if(!m) return false;
-      const active = !(m.active===0 || m.active===false || m.active==='0' || m.active==='false');
-      if(!active) return true;
-      if((m.stock_status||'').toLowerCase()==='soldout') return true;
-      const nm = (m.name||'').toLowerCase();
-      if(nm.includes('(habis)') || nm.includes('habis')) return true;
-      return false;
-    }
-    const sorted = (data||[]).slice().sort((a,b)=>{
-      const ha = _isHabis(a)?1:0;
-      const hb = _isHabis(b)?1:0;
-      if(ha!==hb) return ha-hb; // habis di bawah
-      return new Date(a.created_at||0) - new Date(b.created_at||0);
-    });
-    menus=sorted;
-    document.getElementById('loading').style.display='none';
-    if(menus.length===0){ document.getElementById('menuGrid').innerHTML='<div class="col-span-2 text-center opacity-50 py-10 text-[12px]">Belum ada menu real di DB • Tambah via Admin</div>'; return; }
-    document.getElementById('menuGrid').innerHTML=menus.map(m=>{
-      const emoji=m.emoji||getEmojiForMenu(m.name,m.category);
-      const sold=m.stock_status==='soldout';
-      const isActive = (m.active!==0 && m.active!==false && m.active!=='0');
-      const varian=m.variants?.find(x=>x.id==='varian')||m.variants?.[0];
-      const basePrice = varian?.options?.[0]?.price || m.price;
-      const statusLabel = !isActive ? 'TIDAK AKTIF' : (sold ? 'HABIS' : 'AKTIF');
-      const statusColor = !isActive ? 'bg-gray-500' : (sold ? 'bg-red-500' : 'bg-[#22c55e]');
-      // Badge tidak aktif tetap tampil, menu TIDAK disembunyikan (sesuai request)
-      return `<div data-category="${(m.category||'').toLowerCase()}" class="card-menu ${sold?'soldout':''} rounded-[18px] p-3 cursor-pointer active:scale-[0.98] relative overflow-hidden border ${!isActive?'border-gray-500/30':''}" onclick="openDetail('${m.id}')">
-        ${m.badge?`<div class="absolute top-2 left-2 z-10 text-[8px] bg-[#FF6B2B] px-2 py-1 rounded-full font-bold shadow-lg">${m.badge}</div>`:''}
-        <div class="absolute top-2 right-2 z-10 text-[7px] ${statusColor} px-2 py-1 rounded-full font-bold shadow-lg">${statusLabel}</div>
-        <div class="w-full h-[80px] rounded-[12px] bg-[#0F0F0F] flex items-center justify-center text-[36px] mt-3 ${!isActive?'grayscale opacity-60':''}">${emoji}</div>
-        <div class="mt-2"><div class="font-bold text-[13px] leading-tight ${!isActive?'opacity-70':''}">${m.name}</div>
-                <div class="mt-1 font-extrabold text-[13px]">${fmt(basePrice)} ${varian?.options?.length>1?`<span class="text-[10px] opacity-50 font-normal">• ${varian.options.length} varian</span>`:''}</div>
-        </div></div>`;
-    }).join('');
-    // safety: pastikan elemen dengan class soldout tetap di bawah di DOM
-    setTimeout(()=>{
-      try{
-        const grid=document.getElementById('menuGrid');
-        if(!grid) return;
-        const cards=Array.from(grid.children);
-        cards.sort((a,b)=>{
-          const ah=a.classList.contains('soldout')|| (a.innerText||'').toLowerCase().includes('(habis)');
-          const bh=b.classList.contains('soldout')|| (b.innerText||'').toLowerCase().includes('(habis)');
-          if(ah&&!bh) return 1;
-          if(!ah&&bh) return -1;
-          return 0;
-        });
-        cards.forEach(c=>grid.appendChild(c));
-        // apply filter lagi biar info jumlah benar
-        if(typeof filterKategori==='function' && typeof currentFilter!=='undefined') filterKategori(currentFilter);
-      }catch(e){}
-    },0);
-    updateCartUI();
-  }catch(e){ document.getElementById('loading').textContent='Gagal load menu real: '+e.message; }
-}
+      <div class="mt-4 space-y-2.5">
+        <button id="btnBayarCOD" class="w-full rounded-full bg-white text-black py-4 font-bold text-[15px] border border-white disabled:opacity-40 disabled:pointer-events-none">🚚 Bayar COD - Bayar di Tempat</button>
+        <button id="btnBayarPickup" class="w-full rounded-full bg-white/10 border border-white/10 py-4 font-bold text-[15px]">🏪 Pickup / Ambil di Warung (Tanpa Ongkir)</button>
+      </div>
+      <div class="mt-3 text-[10px] opacity-40 text-center">Pickup boleh tanpa GPS • Delivery/COD wajib GPS terkunci & valid</div>
+    </div>
+  </div>
 
-let _curDetailObj=null;
-function openDetail(id){
-  const m=menus.find(x=>x.id===id); if(!m) return; _curDetailObj=m; curDetail=m; curQty=1; curAddons={}; curVariant=null; curPedas=null;
-  document.getElementById('detailEmoji').textContent=m.emoji||getEmojiForMenu(m.name,m.category);
-  document.getElementById('detailName').textContent=m.name;
-  const isActiveDetail = (m.active!==0 && m.active!==false && m.active!=='0');
-  document.getElementById('detailDesc').textContent=(isActiveDetail?'':'[TIDAK AKTIF] ') + 'Base '+fmt(m.price);
-  const isActiveD = (m.active!==0 && m.active!==false && m.active!=='0');
-  if(!isActiveD){ document.getElementById('detailStock').innerHTML='<span class="bg-gray-600 px-2 py-1 rounded-full text-[10px] font-bold">TIDAK AKTIF • Tidak bisa dipesan</span>'; } else { document.getElementById('detailStock').innerHTML=m.stock_status==='soldout'?'<span class="text-red-400 font-bold">STOK HABIS</span>':'<span class="text-[#22c55e]">Ready • Real DB</span>'; }
-  // variants real
-  const varianGroup=m.variants?.find(x=>x.id==='varian'); const pedasGroup=m.variants?.find(x=>x.id==='pedas');
-  const varBox=document.getElementById('variantBox'); const varList=document.getElementById('variantList');
-  if(varianGroup && varianGroup.options && varianGroup.options.length>0){
-    varBox.classList.remove('hidden'); curVariant=varianGroup.options[0];
-    varList.innerHTML=varianGroup.options.map((o,i)=>`<button onclick="pickVariant(${i})" id="varBtn${i}" class="opt-btn rounded-full border ${i===0?'is-selected':'is-unselected'} px-4 py-2.5 text-[12px] font-bold">${o.label||o.name}<br><span class="text-[11px] opacity-70">${fmt(o.price)}</span></button>`).join('');
-  } else { varBox.classList.add('hidden'); curVariant={label:'Biasa', price:m.price}; }
-  const pedasList=document.getElementById('pedasList');
-  if(pedasGroup && pedasGroup.options){
-    pedasList.innerHTML=pedasGroup.options.map((o,i)=>`<button onclick="pickPedas(${i})" id="pedasBtn${i}" class="opt-btn rounded-full border ${i===0?'is-selected':'is-unselected'} px-3 py-2 text-[11px]">${o.label||o.name}</button>`).join(''); curPedas=pedasGroup.options[0];
-  } else { pedasList.innerHTML='<div class="opacity-50 text-[11px]">Tidak ada level pedas</div>'; }
-  const addonList=document.getElementById('addonList'); addonList.innerHTML=(m.addons||[]).map((a,idx)=>`<div class="flex justify-between items-center bg-[#0F0F0F] border border-white/10 rounded-full px-4 py-2.5"><div><div class="text-[12px] font-bold">${a.name}</div><div class="text-[10px] opacity-50">+${fmt(a.price)}</div></div><div class="flex items-center gap-2"><button onclick="changeAddon(${idx},-1)" class="w-7 h-7 rounded-full bg-white/10">-</button><span id="addonQty${idx}" class="text-[12px] w-4 text-center">0</span><button onclick="changeAddon(${idx},1)" class="w-7 h-7 rounded-full bg-white text-black">+</button></div></div>`).join('') || '<div class="opacity-40 text-[11px]">Tanpa addon</div>';
-  document.getElementById('customRequest').value=''; document.getElementById('customRequestCount').textContent='0'; document.getElementById('detailQty').textContent='1';
-  updateDetailPrice(); document.getElementById('detailModal').classList.remove('hidden');
-}
-function closeDetail(){ document.getElementById('detailModal').classList.add('hidden'); }
-function pickVariant(i){ const m=_curDetailObj; const grp=m.variants?.find(x=>x.id==='varian'); if(!grp) return; curVariant=grp.options[i]; document.querySelectorAll('[id^=varBtn]').forEach((b,idx)=>{ b.className= 'opt-btn rounded-full border '+(idx===i?'is-selected':'is-unselected')+' px-4 py-2.5 text-[12px] font-bold'; }); updateDetailPrice(); }
-function pickPedas(i){ const m=_curDetailObj; const grp=m.variants?.find(x=>x.id==='pedas'); if(!grp) return; curPedas=grp.options[i]; document.querySelectorAll('[id^=pedasBtn]').forEach((b,idx)=>{ b.className= 'opt-btn rounded-full border '+(idx===i?'is-selected':'is-unselected')+' px-3 py-2 text-[11px]'; }); }
-function changeDetailQty(d){ curQty=Math.max(1,curQty+d); document.getElementById('detailQty').textContent=curQty; updateDetailPrice(); }
-function changeAddon(idx,d){ const m=_curDetailObj; const a=m.addons[idx]; const cur=curAddons[idx]||0; const next=Math.max(0,Math.min(a.max||10,cur+d)); curAddons[idx]=next; document.getElementById('addonQty'+idx).textContent=next; updateDetailPrice(); }
-function updateDetailPrice(){
-  if(!_curDetailObj) return;
-  const base=Number(curVariant?.price||_curDetailObj.price||0);
-  let addonSum=0; (_curDetailObj.addons||[]).forEach((a,idx)=>{ addonSum+=(curAddons[idx]||0)*Number(a.price||0); });
-  const total=(base+addonSum)*curQty;
-  document.getElementById('detailTotalPrice').textContent=fmt(total); document.getElementById('detailBtnTotal').textContent=fmt(total);
-}
+  <!-- Payment Modal / Konfirmasi Order -->
+  <div id="paymentModal" class="fixed inset-0 z-[80] hidden">
+    <div id="paymentOverlay" class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+    <div class="relative mx-auto max-w-[480px] px-4 py-6 mt-2 max-h-[95vh] overflow-auto pb-28">
+      <div class="rounded-[24px] bg-[#1A1A1A] border border-white/10 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+        <div class="flex justify-between items-center">
+          <div id="payModalTitle" class="font-bold text-[16px]">KONFIRMASI PESANAN</div>
+          <button id="btnClosePaymentModal" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">✕</button>
+        </div>
+        <div class="mt-2 text-[12px] opacity-60">Order ID: <span id="payOrderId" class="font-bold">-</span> • Total: <span id="payTotal" class="font-bold text-[#FF6B2B]">Rp 0</span></div>
+        <div class="mt-4 rounded-[14px] bg-[#0F0F0F] border border-white/10 p-3 max-h-[220px] overflow-auto text-[11px] whitespace-pre-wrap leading-relaxed" id="payOrderDetail"></div>
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <button id="btnCopyWA" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📋 Copy Pesan</button>
+          <button id="btnOpenTracking" class="rounded-full bg-white/10 border border-white/10 py-3 text-[11px] font-bold">📦 Lacak Pesanan</button>
+        </div>
+        <div class="mt-4">
+          <a id="waLink" href="#" class="block w-full text-center rounded-full bg-[#25D366] text-black py-4 font-bold text-[15px] shadow-[0_4px_16px_rgba(37,211,102,0.4)]">📲 Konfirmasi WA</a>
+        </div>
+        <div class="mt-3 text-[10px] opacity-40 text-center">Pesanan disimpan ke database • WA admin otomatis terbuka</div>
+      </div>
+    </div>
+  </div>
 
-function addToCart(){
-  if(!_curDetailObj) return;
-  if(_curDetailObj.stock_status==='soldout'){ alert('Stok habis'); return; }
-  const base=Number(curVariant?.price||_curDetailObj.price||0);
-  let addonSum=0; const addonArr=[]; (_curDetailObj.addons||[]).forEach((a,idx)=>{ const q=curAddons[idx]||0; if(q>0){ addonSum+=q*Number(a.price); addonArr.push({id:a.id, label:a.name, qty:q, price:Number(a.price)}); } });
-  const total=(base+addonSum)*curQty;
-  const item={ menuId:_curDetailObj.id, name:_curDetailObj.name, emoji:_curDetailObj.emoji||getEmojiForMenu(_curDetailObj.name,_curDetailObj.category), variantLabel:curVariant?.label||curVariant?.name||'Biasa', pedasLabel:curPedas?.label||curPedas?.name||'', addons:addonArr, note:document.getElementById('customRequest').value.trim(), qty:curQty, unitPrice:base+addonSum, totalPrice:total };
-  cart.push(item); localStorage.setItem('npw_cart', JSON.stringify(cart)); updateCartUI(); closeDetail();
-  const toast=document.getElementById('addToast'); toast.classList.remove('hidden'); toast.classList.add('flex'); setTimeout(()=>{ toast.classList.add('hidden'); toast.classList.remove('flex'); },1500);
-}
+  <!-- History Modal -->
+  <div id="historyModal" class="fixed inset-0 z-50 hidden">
+    <div id="historyOverlay" class="absolute inset-0 bg-black/70"></div>
+    <div class="relative bg-[#1A1A1A] rounded-t-[28px] mt-20 mx-auto max-w-[480px] p-5 max-h-[80vh] overflow-auto">
+      <div class="flex justify-between">
+        <h2 class="font-bold">Riwayat</h2>
+        <button id="btnCloseHistory" class="w-8 h-8 rounded-full bg-white text-black">✕</button>
+      </div>
+      <div id="historyHeader" class="mb-3 text-[12px] font-bold"></div>
+      <div id="historyList" class="mt-4 space-y-2"></div>
+    </div>
+  </div>
 
-function updateCartUI(){
-  const count=cart.reduce((a,b)=>a+b.qty,0); const total=cart.reduce((a,b)=>a+b.totalPrice,0);
-  document.getElementById('cartCount').textContent=count; document.getElementById('cartItems').textContent=count+' menu'; document.getElementById('cartTotal').textContent=fmt(total);
-  document.getElementById('modalCount').textContent=count; document.getElementById('subtotalVal').textContent=fmt(total); document.getElementById('totalVal').textContent=fmt(total+curOngkir);
-  document.getElementById('cartList').innerHTML=cart.map((c,i)=>`<div class="flex justify-between gap-3 bg-[#0F0F0F] border border-white/10 rounded-[14px] p-3"><div class="flex-1"><div class="text-[12px] font-bold">${c.emoji} ${c.name} (${c.variantLabel}) x${c.qty}</div><div class="text-[10px] opacity-50">${c.pedasLabel||''} ${c.addons.map(a=>a.qty+'x '+a.label).join(', ')} ${c.note?'• '+c.note:''}</div><div class="text-[11px] font-bold mt-1">${fmt(c.totalPrice)}</div></div><button onclick="removeCart(${i})" class="w-8 h-8 rounded-full bg-white/10">✕</button></div>`).join('') || '<div class="opacity-40 text-[11px] text-center py-4">Keranjang kosong</div>';
-  document.getElementById('cartBar').classList.toggle('hidden', count===0);
-}
-function removeCart(i){ cart.splice(i,1); localStorage.setItem('npw_cart', JSON.stringify(cart)); updateCartUI(); }
-
-function autofillCustomerFromHistory(){
-  try{
-    const profile = JSON.parse(localStorage.getItem('npw_customer_profile')||localStorage.getItem('npw_last_customer')||'null') || JSON.parse(localStorage.getItem('npw_history')||'[]')[0]?.customer || null;
-    if(!profile) return;
-    const nameEl=document.getElementById('custName');
-    const phoneEl=document.getElementById('custPhone');
-    const addrEl=document.getElementById('custAddr');
-    const mapsEl=document.getElementById('custMaps');
-    if(nameEl && !nameEl.value && profile.name) nameEl.value=profile.name;
-    if(phoneEl && !phoneEl.value && (profile.phone||profile.hp)) phoneEl.value=profile.phone||profile.hp;
-    if(addrEl && !addrEl.value && (profile.address||profile.alamat)) addrEl.value=profile.address||profile.alamat;
-    // maps jangan autofill jika sudah ada GPS baru, tapi kalau kosong isi last maps
-    if(mapsEl && !mapsEl.value && profile.maps) mapsEl.value=profile.maps;
-  }catch(e){ console.log('autofill fail', e); }
-}
-
-function openCheckout(){
- if(cart.length===0) return alert('Keranjang kosong');
- try{ autofillCustomerFromHistory(); }catch(e){}
- document.getElementById('checkoutModal').classList.remove('hidden');
- updateOngkir();
- // GPS auto insert ke field saja (silent), tidak tampil dibawah
- setTimeout(()=>{ silentAutoGpsOnCheckout(); }, 500);
-}
-
-function autoFillOnLoad(){ /* legacy - sudah diganti autofillCustomerFromHistory */ }
-
-function getGPS(){ return autoDetectGps(true); }
-function getGPS_old(){
-  const btn=document.getElementById('btnGPS'); btn.textContent='⏳...'; btn.disabled=true;
-  if(!navigator.geolocation){ alert('Geolocation tidak support'); btn.textContent='📍 GPS'; btn.disabled=false; return; }
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude; const lng=pos.coords.longitude; const acc=pos.coords.accuracy;
-    lastValidCoords={lat,lng}; gpsValidated=true; mapLocked=true; mapValidated=true; // FIX: auto kunci hijau setelah GPS OK biar bisa save
-    const mapsStr=`${lat.toFixed(7)},${lng.toFixed(7)}`;
-    document.getElementById('custMaps').value=mapsStr; document.getElementById('gpsMiniInfo').textContent=`Akurasi ±${Math.round(acc)}m • Klik Kunci untuk validasi real`;
-    document.getElementById('gpsStatusDot').className='w-2 h-2 rounded-full bg-[#22c55e]'; checkMapValidationUI(); updateOngkir();
-    btn.textContent='✅ GPS OK'; btn.disabled=false; setTimeout(()=>{ btn.textContent='📍 GPS'; },1500);
-  }, err=>{
-    alert('Gagal GPS: '+err.message); btn.textContent='📍 GPS'; btn.disabled=false;
-  }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
-}
-
-
-// === VALIDASI & NORMALISASI HP UNTUK WA REDIRECT ADMIN ===
-function normalizePhoneForWA(raw){
-  if(!raw) return '';
-  let p = String(raw).replace(/[^0-9]/g,''); // hanya angka
-  // hapus leading 0 berulang
-  if(p.startsWith('0')) p = p.replace(/^0+/, '');
-  // jika mulai 8 -> 62 + 8...
-  if(p.startsWith('8')) p = '62' + p;
-  // jika mulai 62 sudah ok
-  // jika mulai 628... sudah ok
-  // jika masih 0 di depan setelah proses
-  p = p.replace(/^0+/, '');
-  if(!p.startsWith('62')) {
-    // fallback jika user ketik 62xxxx tanpa 62? sudah handle
-    // jika masih tidak 62, coba paksa jika panjang 9-12 dan mulai 8
-    if(p.length>=9 && p.length<=13 && !p.startsWith('62')){
-      // asumsikan nomor lokal tanpa 0
-      if(!p.startsWith('62')) p = '62' + p.replace(/^0+/, '');
-    }
-  }
-  return p;
-}
-function isValidIndonesianPhone(raw){
-  const p = normalizePhoneForWA(raw);
-  // minimal 10 digit (62812...), maksimal 15, harus mulai 62 dan setelahnya 8
-  if(!p) return false;
-  if(p.length < 10 || p.length > 15) return false;
-  if(!p.startsWith('62')) return false;
-  // setelah 62 harus 8 (hp Indonesia)
-  const after62 = p.slice(2);
-  if(!after62.startsWith('8')) return false;
-  // tidak boleh semua angka sama
-  if(/^([0-9])\1+$/.test(p)) return false;
-  return true;
-}
-function validatePhoneField(){
-  const el = document.getElementById('custPhone');
-  if(!el) return true;
-  const raw = el.value.trim();
-  const ok = isValidIndonesianPhone(raw);
-  if(!ok){
-    el.classList.add('!border-red-500');
-    el.classList.add('border-red-500');
-    return false;
-  } else {
-    el.classList.remove('!border-red-500');
-    el.classList.remove('border-red-500');
-    // auto-format ke 62... saat blur
-    const norm = normalizePhoneForWA(raw);
-    if(norm!==raw) {
-      // simpan yang rapi tapi tetap tampil 0...? kita tampilkan 62...
-      // el.value = norm;
-    }
-    return true;
-  }
-}
-// live validation
-setTimeout(()=>{
-  const ph = document.getElementById('custPhone');
-  if(ph){
-    ph.setAttribute('inputmode','numeric');
-    ph.setAttribute('placeholder','HP WA (08xx / 628xx) *');
-    ph.addEventListener('input', ()=>{
-      // hanya angka, +, spasi, -
-      let v = ph.value.replace(/[^0-9+\s\-]/g,'');
-      if(v!==ph.value) ph.value = v;
-      validatePhoneField();
-    });
-    ph.addEventListener('blur', ()=>{
-      const norm = normalizePhoneForWA(ph.value.trim());
-      if(isValidIndonesianPhone(ph.value)){
-        // tampilkan format 62... agar admin bisa langsung wa.me
-        ph.value = norm;
-      }
-      validatePhoneField();
-    });
-  }
-}, 800);
-
-function bayar(method){
-  if(cart.length===0){ alert('Keranjang kosong!'); return; }
-  const name=document.getElementById('custName').value.trim(); 
-  let phone=document.getElementById('custPhone').value.trim(); 
-  const addr=document.getElementById('custAddr').value.trim(); 
-  const mapsCheck=document.getElementById('custMaps').value.trim();
-  if(!name||!phone||!addr){ alert('Nama, HP, Alamat wajib diisi'); return; }
-  // VALIDASI HP - support WA redirect admin
-  if(!isValidIndonesianPhone(phone)){
-    alert('Nomor HP tidak valid.\nContoh valid: 0812xxxxxxx atau 62812xxxxxxx\nHarus nomor HP Indonesia aktif WA.');
-    const el=document.getElementById('custPhone'); if(el){ el.focus(); el.classList.add('border-red-500'); el.classList.add('!border-red-500'); }
-    return;
-  }
-  phone = normalizePhoneForWA(phone); // simpan format 62... agar wa.me langsung jalan di dashboard admin
-
-  if(method!=='pickup'){
-    const latLng=parseLatLng(mapsCheck); if(!latLng){ alert('GPS belum terkunci. Klik GPS dulu.'); return; }
-    if(!mapLocked){ alert('Wajib Kunci & Validasi hijau untuk COD. Klik tombol Kunci & Validasi.'); return; }
-    if(WARUNG_CONFIG && curJarak>Number(WARUNG_CONFIG.max_radius_km||10)){ alert(`Jarak ${curJarak.toFixed(2)}km melebihi radius ${WARUNG_CONFIG.max_radius_km}km - Pilih Pickup`); return; }
-  }
-  if(!WARUNG_IS_OPEN && method!=='pickup'){
-    const slot=document.getElementById('preorderSlot').value; if(!slot){ alert('⛔ Warung tutup. Pilih jam Pre-Order.'); return; }
-  }
-  const sub=cart.reduce((a,b)=>a+b.totalPrice,0); const grand=sub+(method==='pickup'?0:curOngkir);
-  const tableNoValue = addr + " | Maps: "+mapsCheck+" | Jarak: "+(curJarak?curJarak.toFixed(3)+'km':'-')+" | Ongkir: "+(curOngkir===0?"Gratis":fmt(curOngkir)) + " | Warung: "+WARUNG.maps + " | Metode: "+method.toUpperCase() + (document.getElementById('preorderSlot').value? " | Pre-Order: "+document.getElementById('preorderSlot').value : "") + " | COD/Pickup Only";
-  curOrderId='NPW-'+Math.floor(100000+Math.random()*900000);
-  document.getElementById('payOrderId').textContent=curOrderId; document.getElementById('payTotal').textContent=fmt(grand);
-  // PESAN WA SEDERHANA - tanpa komentar tidak perlu, langsung siap redirect admin
-  let rincian=`Halo Nasgor Pak W, ada pesanan baru!\n\nOrder: ${curOrderId}\nNama: ${name}\nHP: ${phone}\nAlamat: ${addr}\nMaps: ${mapsCheck}\n`;
-  if(curJarak>0) rincian+=`Jarak: ${curJarak.toFixed(2)}km | Ongkir: ${curOngkir===0?'Gratis':fmt(curOngkir)}\n`;
-  if(document.getElementById('preorderSlot').value) rincian+=`Pre-Order: ${document.getElementById('preorderSlot').value} WIB\n`;
-  rincian+=`\nPesanan:\n`;
-  cart.forEach((c,i)=>{ 
-    rincian+=`${i+1}. ${c.name} ${c.variantLabel!=='Biasa'?'('+c.variantLabel+')':''} x${c.qty} = ${fmt(c.totalPrice)}\n`;
-    if(c.pedasLabel) rincian+=`   Pedas: ${c.pedasLabel}\n`;
-    if(c.addons && c.addons.length>0) rincian+=`   Addon: ${c.addons.map(a=>a.qty+'x '+a.label).join(', ')}\n`;
-    if(c.note) rincian+=`   Catatan: ${c.note}\n`;
-  });
-  rincian+=`\nSubtotal: ${fmt(sub)}\nOngkir: ${curOngkir===0?'Gratis':fmt(curOngkir)}\nTOTAL: ${fmt(grand)}\n\nMetode: ${method.toUpperCase()}\n`;
-  document.getElementById('payOrderDetail').textContent=rincian; window.lastWA=rincian;
-  const waUrl="https://wa.me/6282296728478?text="+encodeURIComponent(rincian); document.getElementById('waLink').href=waUrl;
-  document.getElementById('checkoutModal').classList.add('hidden'); document.getElementById('cartBar').classList.add('hidden'); document.getElementById('paymentModal').classList.remove('hidden');
-  const payload={ mode: method==='pickup'?"pickup":"delivery", payment_method: method, tableNo: tableNoValue, table_no: tableNoValue, customer:{name,phone,address:addr,mapsLink:mapsCheck}, total_before_fee:sub, total:grand, ongkir: method==='pickup'?0:curOngkir, jarak_km:curJarak, warung:{lat:WARUNG.lat,lng:WARUNG.lng,maps:WARUNG.maps}, map_locked:mapLocked, map_validated:mapValidated, gps_validated:gpsValidated, scheduled_time: document.getElementById('preorderSlot').value||null, cart: cart.map(c=>({menuId:c.menuId,name:c.name,variantLabel:c.variantLabel,pedasLabel:c.pedasLabel,addons:c.addons,note:c.note||"",qty:c.qty,unitPrice:c.unitPrice,totalPrice:c.totalPrice,emoji:c.emoji})) };
-  window.pendingPayload=payload; window.pendingWAUrl=waUrl; window.dbSaved=false;
-}
-
-function handleWAConfirm(e){ e.preventDefault(); const waLinkEl=document.getElementById('waLink'); if(cart.length===0 && !window.pendingPayload){ alert('Keranjang kosong'); closePaymentAndClearCart(); return false; } if(window.dbSaved){ window.open(window.pendingWAUrl,'_blank'); closePaymentAndClearCart(); return false; } waLinkEl.textContent='Menyimpan real & validasi server...'; waLinkEl.style.pointerEvents='none'; fetch(API_BASE+"/api/order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(window.pendingPayload)}).then(r=>r.json().then(j=>({ok:r.ok,status:r.status,json:j})).catch(()=>({ok:r.ok,json:null}))).then(res=>{ if(!res.ok){ alert('❌ Validasi server gagal: '+(res.json?.error||'Unknown')+'\\nKode: '+(res.json?.code||'')); waLinkEl.textContent='📲 Konfirmasi WA & Simpan (Real)'; waLinkEl.style.pointerEvents='auto'; return; } if(res.json && res.json.orderId){ curOrderId=res.json.orderId; document.getElementById('payOrderId').textContent=curOrderId; let newRincian=window.lastWA.replace(/NPW-\d+/,curOrderId); window.lastWA=newRincian; document.getElementById('payOrderDetail').textContent=newRincian; window.pendingWAUrl="https://wa.me/6282296728478?text="+encodeURIComponent(newRincian); waLinkEl.href=window.pendingWAUrl; localStorage.setItem('last_order_id',curOrderId); const hist=JSON.parse(localStorage.getItem('npw_history')||'[]'); const menuNames = (window.pendingPayload.cart||[]).map(c=>`${c.qty}x ${c.name} ${c.variantLabel||''}`).join(', '); 
-      hist.unshift({id:curOrderId, menuNames: menuNames, cart: window.pendingPayload.cart, customer:window.pendingPayload.customer, total:res.json.total, created_at:new Date().toISOString()});
-      // simpan profil customer agar tidak isi berulang
-      try{
-        const custProfile = {name: window.pendingPayload.customer.name||document.getElementById('custName')?.value||'', phone: window.pendingPayload.customer.phone||document.getElementById('custPhone')?.value||'', address: window.pendingPayload.customer.address||document.getElementById('custAddr')?.value||'', maps: window.pendingPayload.customer.mapsLink||document.getElementById('custMaps')?.value||'', updated_at: new Date().toISOString()};
-        localStorage.setItem('npw_customer_profile', JSON.stringify(custProfile));
-        // also keep last used for autofill
-        localStorage.setItem('npw_last_customer', JSON.stringify(custProfile));
-      }catch(e){} localStorage.setItem('npw_history', JSON.stringify(hist.slice(0,10))); } window.dbSaved=true; waLinkEl.textContent='Membuka WA...'; setTimeout(()=>{ window.open(window.pendingWAUrl,'_blank'); setTimeout(()=>{ closePaymentAndClearCart(); },1000); },600); }).catch(err=>{ console.error('Fetch error:', err); alert('❌ Failed to fetch - Worker tidak bisa dihubungi:\n'+err.message+'\n\n1) Pastikan Worker https://nasgor-v2.welybudiprasetya.workers.dev/api/config bisa dibuka\n2) Cek internet\n3) Coba buka di tab baru: '+API_BASE+'/api/config'); waLinkEl.textContent='📲 Konfirmasi WA & Simpan'; waLinkEl.style.pointerEvents='auto'; }); return false; }
-function closePaymentAndClearCart(){ cart=[]; curAddons={}; curQty=1; localStorage.removeItem('npw_cart'); updateCartUI(); document.getElementById('cartBar').classList.add('hidden'); document.getElementById('checkoutModal').classList.add('hidden'); document.getElementById('paymentModal').classList.add('hidden'); window.pendingPayload=null; window.dbSaved=false; gpsValidated=false; mapValidated=false; mapLocked=false; lastValidCoords=null; curOngkir=0; curJarak=0; checkMapValidationUI(); const waLinkEl=document.getElementById('waLink'); if(waLinkEl){ waLinkEl.textContent='📲 Konfirmasi WA & Simpan (Real)'; waLinkEl.style.pointerEvents='auto'; waLinkEl.href='#'; } }
-function closePaymentModal(){ document.getElementById('paymentModal').classList.add('hidden'); if(window.dbSaved){ closePaymentAndClearCart(); } else { if(cart.length>0) document.getElementById('cartBar').classList.remove('hidden'); } }
-function openTracking(){ const id=localStorage.getItem('last_order_id')||curOrderId; if(!id){ alert('Belum ada order real'); return; } const trackUrl='track.html?id='+encodeURIComponent(id); window.open(trackUrl,'_blank'); }
-function copyWA(){ if(!window.lastWA){ alert('Belum ada pesanan'); return; } navigator.clipboard.writeText(window.lastWA).then(()=>alert('Dicopy!')); }
-function openHistory(){ 
-  document.getElementById('historyModal').classList.remove('hidden'); 
-  const hist=JSON.parse(localStorage.getItem('npw_history')||'[]').slice(0,10); 
-  const box=document.getElementById('historyList'); 
-  const header=document.getElementById('historyHeader');
-  if(header) header.innerHTML=`<div class="flex justify-between items-center"><span>Riwayat (${hist.length}/10 terbaru)</span><button onclick="clearHistory()" class="px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-[10px]">🗑️ Clear Histori</button></div>`;
-  if(hist.length===0) box.innerHTML='<div class="opacity-50 text-[12px]">Belum ada riwayat real</div>'; 
-  else box.innerHTML=hist.map(h=>`<div class="bg-[#0F0F0F] border border-white/10 rounded-[12px] p-3"><div class="font-bold text-[12px]">${h.menuNames||h.customer?.name||'Pesanan'} • ${fmt(h.total||0)}</div><div class="text-[11px] opacity-70 mt-1 line-clamp-2">${h.menuNames||'-'}</div><div class="text-[10px] opacity-50 mt-1">${new Date(h.created_at).toLocaleString('id-ID')} • ${h.customer?.name||''}</div><div class="mt-2 flex gap-2"><button onclick="reorderFromHistory('${h.id}')" class="text-[10px] px-3 py-1 rounded-full bg-white/10 border border-white/10">Pesan Lagi</button></div></div>`).join(''); 
-}
-function clearHistory(){
-  if(!confirm('Hapus semua histori transaksi (max 10)?')) return;
-  localStorage.removeItem('npw_history'); localStorage.removeItem('last_order_id');
-  document.getElementById('historyList').innerHTML='<div class="opacity-50 text-[12px]">Histori dikosongkan</div>';
-  const header=document.getElementById('historyHeader'); if(header) header.innerHTML='Riwayat (0/10)';
-}
-function reorderFromHistory(id){
-  try{
-    const hist=JSON.parse(localStorage.getItem('npw_history')||'[]');
-    const item=hist.find(h=>h.id===id);
-    if(!item || !item.cart || item.cart.length===0){
-      alert('Cart histori tidak ditemukan, silakan pesan manual');
-      return;
-    }
-    // merge cart
-    const existing = JSON.parse(localStorage.getItem('npw_cart')||'[]');
-    // replace with histori cart
-    const newCart = item.cart.map(c=>({
-      menuId: c.menuId, name: c.name, variantLabel: c.variantLabel||'Biasa', pedasLabel: c.pedasLabel||'', 
-      addons: c.addons||[], note: c.note||'', qty: c.qty||1, 
-      unitPrice: c.unitPrice||c.totalPrice||0, totalPrice: c.totalPrice|| (c.unitPrice*c.qty), emoji: c.emoji||'🍛'
-    }));
-    cart = newCart;
-    localStorage.setItem('npw_cart', JSON.stringify(cart));
-    updateCartUI();
-    document.getElementById('historyModal').classList.add('hidden');
-    // autofill customer from this histori
-    try{
-      if(item.customer){
-        localStorage.setItem('npw_customer_profile', JSON.stringify({name:item.customer.name||'', phone:item.customer.phone||'', address:item.customer.address||'', maps:item.customer.mapsLink||'', updated_at:new Date().toISOString()}));
-      }
-    }catch(e){}
-    setTimeout(()=>{ openCheckout(); }, 300);
-  }catch(e){
-    console.log(e); alert('Gagal pesan lagi: '+e.message);
-  }
-}
-
-
-document.getElementById('customRequest')?.addEventListener('input', function(){ document.getElementById('customRequestCount').textContent=this.value.length; });
-
-
-// AUTO DETECT GPS - FIXED SILENT INSERT + RINCIAN SYNC
-let autoGpsAttempted=false;
-function autoDetectGps(force=false){
-  if(autoGpsAttempted && !force) autoGpsAttempted=false;
-  autoGpsAttempted=true;
-  if(!navigator.geolocation){ autoGpsAttempted=false; return; }
-  navigator.geolocation.getCurrentPosition((pos)=>{
-    const lat=pos.coords.latitude, lng=pos.coords.longitude;
-    lastValidCoords={lat,lng};
-    mapLocked=true; mapValidated=true; gpsValidated=true;
-    const mapsField = document.getElementById('custMaps') || document.getElementById('customerMaps');
-    if(mapsField){
-      mapsField.value=`https://www.google.com/maps?q=${lat},${lng}`;
-      mapsField.placeholder=`${lat.toFixed(6)}, ${lng.toFixed(6)} • terkunci`;
-    }
-    if(typeof checkMapValidationUI==='function') checkMapValidationUI();
-    // FIX: hitung ongkir pakai fungsi utama updateOngkir() agar rincian sinkron
-    if(typeof updateOngkir==='function') updateOngkir();
-    else if(WARUNG && WARUNG.lat) calcOngkirFromCoords(lat,lng);
-    autoGpsAttempted=false;
-  }, (err)=>{
-    autoGpsAttempted=false;
-    console.log('GPS fail', err);
-  }, {enableHighAccuracy:true, timeout:10000, maximumAge:60000});
-}
-function silentAutoGpsOnCheckout(){
-  const mapsField = document.getElementById('custMaps');
-  if(!mapsField) return;
-  if(!mapLocked){
-    autoDetectGps(true);
-  } else if(mapsField.value && !lastValidCoords){
-    // kalau field sudah ada link (dari autofill) tapi lastValidCoords kosong, parse & hitung
-    const m = mapsField.value.match(/@?(-?\d+\.\d+),(-?\d+\.\d+)/) || mapsField.value.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if(m){ lastValidCoords={lat:parseFloat(m[1]), lng:parseFloat(m[2])}; if(typeof updateOngkir==='function') updateOngkir(); }
-  }
-}
-function lockManualMap(){
-  const mapsField = document.getElementById('custMaps') || document.getElementById('customerMaps');
-  const mapsVal = mapsField ? mapsField.value.trim() : '';
-  if(!mapsVal){ alert('Isi link Maps dulu'); return; }
-  const m = mapsVal.match(/@?(-?\d+\.\d+),(-?\d+\.\d+)/) || mapsVal.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if(m){ lastValidCoords={lat:parseFloat(m[1]), lng:parseFloat(m[2])}; }
-  mapLocked=true; mapValidated=true; 
-  if(typeof checkMapValidationUI==='function') checkMapValidationUI();
-  if(typeof updateOngkir==='function') updateOngkir();
-}
-function calcOngkirFromCoords(lat,lng){
-  // fallback, pakai updateOngkir utama
-  if(typeof updateOngkir==='function'){ updateOngkir(); return; }
-  if(!WARUNG || !WARUNG.lat) return;
-  const R=6371; const dLat=(WARUNG.lat-lat)*Math.PI/180; const dLng=(WARUNG.lng-lng)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2 + Math.cos(lat*Math.PI/180)*Math.cos(WARUNG.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-  const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); const jarak=R*c;
-  curJarak=jarak;
-  const freeR=WARUNG.free_radius_km||0.5; const pricePer100m=WARUNG.price_per_100m||300; const maxR=WARUNG.max_radius_km||10;
-  if(jarak>maxR){ curOngkir=0; } else if(jarak<=freeR) curOngkir=0; else curOngkir=Math.ceil((jarak-freeR)*10)*pricePer100m;
-  if(typeof updateCartUI==='function') updateCartUI();
-}
-
-
-// Splash screen logic - hide after config+menu loaded
-let splashMinTime = Date.now();
-function hideSplash(){
-  const elapsed = Date.now() - splashMinTime;
-  const minShow = 900; // minimal 0.9s biar kelihatan
-  const delay = Math.max(0, minShow - elapsed);
-  setTimeout(()=>{
-    const s = document.getElementById('splashScreen');
-    if(s){ s.classList.add('hide'); setTimeout(()=>s.remove(), 600); }
-  }, delay);
-}
-
-// --- THEME SWITCH ---
-const THEME_KEY = 'npw_theme'; // auto | light | dark
-function getSystemTheme(){
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-}
-function applyTheme(theme){
-  const root = document.documentElement;
-  if(!theme || theme==='auto'){
-    root.removeAttribute('data-theme');
-    localStorage.removeItem(THEME_KEY);
-  } else {
-    root.setAttribute('data-theme', theme);
-    localStorage.setItem(THEME_KEY, theme);
-  }
-  updateThemeIcon(theme || 'auto');
-  // update meta theme-color
-  const metaDark = document.querySelector('meta[name="theme-color"][media*="dark"]');
-  const metaLight = document.querySelector('meta[name="theme-color"][media*="light"]');
-  // also keep generic meta synced for PWA bar
-  let genericMeta = document.querySelector('meta[name="theme-color"]:not([media])');
-  if(!genericMeta){
-    genericMeta = document.createElement('meta');
-    genericMeta.name='theme-color';
-    document.head.appendChild(genericMeta);
-  }
-  const effective = theme==='auto' || !theme ? getSystemTheme() : theme;
-  genericMeta.content = effective==='light' ? '#F6F3EE' : '#0A0A0A';
-}
-function updateThemeIcon(theme){
-  const btn = document.getElementById('themeToggle');
-  if(!btn) return;
-  const effective = theme==='auto' || !theme ? getSystemTheme() : theme;
-  if(theme==='auto' || !theme){
-    btn.textContent = '📱';
-    btn.title = 'Auto (ikut HP) - klik untuk Light';
-  } else if(theme==='light'){
-    btn.textContent = '☀️';
-    btn.title = 'Light - klik untuk Dark';
-  } else {
-    btn.textContent = '🌙';
-    btn.title = 'Dark - klik untuk Auto';
-  }
-}
-function toggleTheme(){
-  const current = localStorage.getItem(THEME_KEY) || 'auto';
-  let next;
-  if(current==='auto') next='light';
-  else if(current==='light') next='dark';
-  else next='auto';
-  applyTheme(next);
-}
-(function initTheme(){
-  const saved = localStorage.getItem(THEME_KEY) || 'auto';
-  applyTheme(saved);
-  // listen system change if auto
-  if(window.matchMedia){
-    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()=>{
-      const cur = localStorage.getItem(THEME_KEY) || 'auto';
-      if(cur==='auto') applyTheme('auto');
-    });
-  }
-})();
-
-
-
-// === GOOGLE LOGIN INTEGRATION - OPSIONAL, AUTO NAMA PELANGGAN ===
-const GOOGLE_CLIENT_ID = "783222505177-p7ite7jetiathok0fl927tsmu5m0ae0m.apps.googleusercontent.com";
-let _googleProfile = null;
-
-function handleGoogleCredential(response){
-  try{
-    const payload = JSON.parse(atob(response.credential.split('.').map(p=>p.replace(/-/g,'+').replace(/_/g,'/'))[1] || response.credential.split('.')[1]));
-    // fallback decode
-  }catch(e){}
-  try{
-    const base64 = response.credential.split('.')[1];
-    const json = JSON.parse(decodeURIComponent(atob(base64).split('').map(function(c) { return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2); }).join('')));
-    const name = json.name || '';
-    const email = json.email || '';
-    const picture = json.picture || '';
-    _googleProfile = {name,email,picture, credential: response.credential};
-    localStorage.setItem('npw_google_profile', JSON.stringify({name,email,picture, updated_at: new Date().toISOString()}));
-    // auto isi nama pelanggan
-    const nameEl = document.getElementById('custName');
-    if(nameEl){ 
-      if(!nameEl.value || nameEl.value.trim().length<2) nameEl.value = name;
-      else {
-        // jika sudah ada, tanya? kita timpa saja jika beda tipis, tapi jangan paksa
-        // nameEl.value = name;
-      }
-    }
-    // simpan juga ke customer profile yang sudah ada
-    try{
-      const existing = JSON.parse(localStorage.getItem('npw_customer_profile')||'{}');
-      existing.name = name;
-      existing.email = email;
-      existing.google_picture = picture;
-      existing.updated_at = new Date().toISOString();
-      localStorage.setItem('npw_customer_profile', JSON.stringify(existing));
-    }catch(e){}
-    updateGoogleUI();
-    // hilangkan prompt setelah sukses
-    try{ google.accounts.id.cancel(); }catch(e){}
-  }catch(err){
-    console.log('google parse fail', err);
-  }
-}
-
-function updateGoogleUI(){
-  try{
-    const wrapper = document.getElementById('googleLoginWrapper');
-    const box = document.getElementById('googleLoginBox');
-    const profileBox = document.getElementById('googleProfileBox');
-    const status = document.getElementById('googleLoginStatus');
-    const saved = JSON.parse(localStorage.getItem('npw_google_profile')||'null');
-    if(saved && saved.name){
-      if(box) box.classList.add('hidden');
-      if(profileBox){ 
-        profileBox.classList.remove('hidden');
-        profileBox.classList.add('flex');
-        const picEl = document.getElementById('googlePic');
-        const nameEl = document.getElementById('googleName');
-        const emailEl = document.getElementById('googleEmail');
-        if(picEl) picEl.src = saved.picture || '';
-        if(nameEl) nameEl.textContent = saved.name;
-        if(emailEl) emailEl.textContent = saved.email || '';
-      }
-      if(status) status.textContent = 'Terhubung ✓';
-      // auto isi jika field kosong
-      const custNameEl = document.getElementById('custName');
-      if(custNameEl && (!custNameEl.value || custNameEl.value.trim().length<2)){
-        custNameEl.value = saved.name;
-      }
-    } else {
-      if(box) box.classList.remove('hidden');
-      if(profileBox){ profileBox.classList.add('hidden'); profileBox.classList.remove('flex'); }
-      if(status) status.textContent = 'Opsional';
-    }
-  }catch(e){}
-}
-
-function googleLogout(){
-  localStorage.removeItem('npw_google_profile');
-  _googleProfile = null;
-  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
-  updateGoogleUI();
-  // render ulang tombol
-  setTimeout(initGoogleLogin, 300);
-}
-
-function initGoogleLogin(){
-  try{
-    if(typeof google==='undefined' || !google.accounts || !google.accounts.id){
-      setTimeout(initGoogleLogin, 800);
-      return;
-    }
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleCredential,
-      auto_select: true,
-      cancel_on_tap_outside: false
-    });
-    const btnParent = document.getElementById('googleLoginBox');
-    if(btnParent){
-      btnParent.innerHTML = '';
-      google.accounts.id.renderButton(btnParent, {
-        theme: "outline",
-        size: "large",
-        text: "continue_with",
-        shape: "pill",
-        width: 300
-      });
-    }
-    // One Tap - muncul otomatis saat checkout dibuka pertama kali
-    // Jangan langsung prompt di load, tunggu checkout dibuka biar gak ganggu
-    updateGoogleUI();
-  }catch(e){ console.log('init google fail', e); }
-}
-
-// Trigger One Tap hanya saat checkout dibuka dan belum login
-const _origOpenCheckoutForGoogle = window.openCheckout;
-if(typeof _origOpenCheckoutForGoogle!=='undefined'){
-  // akan di override nanti setelah fungsi didefinisikan, pakai observer di openCheckout
-}
-
-// Saat halaman siap
-document.addEventListener('DOMContentLoaded', ()=>{
-  setTimeout(initGoogleLogin, 1200);
-  setTimeout(updateGoogleUI, 1500);
-});
-
-// Hook ke openCheckout yang sudah ada
-(function(){
-  const originalOpen = window.openCheckout;
-  window.openCheckout = function(){
-    if(typeof originalOpen==='function') originalOpen.apply(this, arguments);
-    setTimeout(()=>{
-      updateGoogleUI();
-      try{
-        const saved = JSON.parse(localStorage.getItem('npw_google_profile')||'null');
-        if(!saved){
-          // belum login, tampilkan One Tap
-          google.accounts.id.prompt((notification)=>{
-            // jika dismissed, diamkan
-          });
-        }
-      }catch(e){}
-    }, 600);
-  };
-})();
-
-// Saat autofill dari history, juga update UI google
-const _origAutofill = window.autofillCustomerFromHistory;
-if(typeof _origAutofill==='function'){
-  window.autofillCustomerFromHistory = function(){
-    try{ _origAutofill.apply(this, arguments); }catch(e){}
-    updateGoogleUI();
-  };
-}
-
-
-// === AUTO REFRESH BACKGROUND - MENU SELALU UPDATE TANPA GANGGU CUSTOMER ===
-let _lastMenuSignature = '';
-function _menuSignature(arr){
-  try{
-    return (arr||[]).map(m=> `${m.id}|${m.stock_status}|${m.active}|${m.price}|${m.name}`).join(';');
-  }catch{ return ''; }
-}
-async function backgroundRefreshMenu(silent=true){
-  try{
-    const r = await fetch(API_BASE+'/api/menus',{cache:'no-store'});
-    if(!r.ok) return;
-    const data = await r.json();
-    const sig = _menuSignature(data);
-    if(sig && sig===_lastMenuSignature) return; // tidak ada perubahan
-    _lastMenuSignature = sig;
-    // sort sama seperti loadMenu: habis di bawah, lalu ASC created_at
-    function _isHabis(m){
-      if(!m) return false;
-      const active = !(m.active===0 || m.active===false || m.active==='0' || m.active==='false');
-      if(!active) return true;
-      if((m.stock_status||'').toLowerCase()==='soldout') return true;
-      const nm = (m.name||'').toLowerCase();
-      if(nm.includes('(habis)') || nm.includes('habis')) return true;
-      return false;
-    }
-    const sorted = (data||[]).slice().sort((a,b)=>{
-      const ha=_isHabis(a)?1:0, hb=_isHabis(b)?1:0;
-      if(ha!==hb) return ha-hb;
-      return new Date(a.created_at||0)-new Date(b.created_at||0);
-    });
-    menus = sorted;
-    // render ulang tanpa ganggu loading / cart / modal
-    const grid = document.getElementById('menuGrid');
-    if(!grid) return;
-    const wasDetailOpen = !document.getElementById('detailModal')?.classList.contains('hidden');
-    // simpan scroll
-    const scrollY = window.scrollY;
-    grid.innerHTML = menus.map(m=>{
-      const emoji=m.emoji||getEmojiForMenu(m.name,m.category);
-      const sold=m.stock_status==='soldout';
-      const isActive = (m.active!==0 && m.active!==false && m.active!=='0');
-      const varian=m.variants?.find(x=>x.id==='varian')||m.variants?.[0];
-      const basePrice = varian?.options?.[0]?.price || m.price;
-      const statusLabel = !isActive ? 'TIDAK AKTIF' : (sold ? 'HABIS' : 'AKTIF');
-      const statusColor = !isActive ? 'bg-gray-500' : (sold ? 'bg-red-500' : 'bg-[#22c55e]');
-      return `<div data-category="${(m.category||'').toLowerCase()}" class="card-menu ${sold?'soldout':''} rounded-[18px] p-3 cursor-pointer active:scale-[0.98] relative overflow-hidden border ${!isActive?'border-gray-500/30':''}" onclick="openDetail('${m.id}')">
-        ${m.badge?`<div class="absolute top-2 left-2 z-10 text-[8px] bg-[#FF6B2B] px-2 py-1 rounded-full font-bold shadow-lg">${m.badge}</div>`:''}
-        <div class="absolute top-2 right-2 z-10 text-[7px] ${statusColor} px-2 py-1 rounded-full font-bold shadow-lg">${statusLabel}</div>
-        <div class="w-full h-[80px] rounded-[12px] bg-[#0F0F0F] flex items-center justify-center text-[36px] mt-3 ${!isActive?'grayscale opacity-60':''}">${emoji}</div>
-        <div class="mt-2"><div class="font-bold text-[13px] leading-tight ${!isActive?'opacity-70':''}">${m.name}</div>
-                <div class="mt-1 font-extrabold text-[13px]">${fmt(basePrice)} ${varian?.options?.length>1?`<span class="text-[10px] opacity-50 font-normal">• ${varian.options.length} varian</span>`:''}</div>
-        </div></div>`;
-    }).join('');
-    // pastikan habis tetap di bawah di DOM
-    const cards=Array.from(grid.children);
-    cards.sort((a,b)=>{
-      const ah=a.classList.contains('soldout')|| (a.innerText||'').toLowerCase().includes('(habis)');
-      const bh=b.classList.contains('soldout')|| (b.innerText||'').toLowerCase().includes('(habis)');
-      if(ah&&!bh) return 1;
-      if(!ah&&bh) return -1;
-      return 0;
-    });
-    cards.forEach(c=>grid.appendChild(c));
-    if(typeof currentFilter!=='undefined' && typeof filterKategori==='function'){
-      filterKategori(currentFilter);
-    }
-    // jangan ganggu detail modal / cart
-    window.scrollTo(0, scrollY);
-    if(!silent) console.log('menu refreshed background', menus.length);
-  }catch(e){
-    if(!silent) console.log('bg refresh fail', e);
-  }
-}
-// set signature awal setelah loadMenu pertama
-const _origLoadMenuForBg = window.loadMenu;
-if(typeof _origLoadMenuForBg==='function'){
-  const _orig = _origLoadMenuForBg;
-  window.loadMenu = async function(){
-    const res = await _orig.apply(this, arguments);
-    try{ _lastMenuSignature = _menuSignature(menus); }catch{}
-    return res;
-  };
-}
-// interval background: 45 detik
-setInterval(()=> backgroundRefreshMenu(true), 45000);
-// refresh saat user balik ke tab
-document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState==='visible'){
-    backgroundRefreshMenu(true);
-  }
-});
-// refresh juga saat koneksi balik online
-window.addEventListener('online', ()=> backgroundRefreshMenu(true));
-
-fetchWarungConfig().then(()=>{
-  loadMenu().then(()=> hideSplash()).catch(()=> hideSplash());
-}).catch(()=> hideSplash());
-// fallback auto hide 3s
-setTimeout(()=> hideSplash(), 3000);
-
-
-</script>
-
-
-
-
-
-<script>
-let currentFilter = 'all';
-function filterKategori(cat){
-  console.log('filter',cat);
-  currentFilter = cat;
-  document.querySelectorAll('.cat-tab').forEach(b=>{
-    if(b.dataset.cat===cat) b.classList.add('active-cat');
-    else b.classList.remove('active-cat');
-  });
-  const cards = document.querySelectorAll('#menuGrid [data-category]');
-  let visible = 0;
-  cards.forEach(card=>{
-    let c = (card.getAttribute('data-category')||'').toLowerCase();
-    if(c==='nasgor' || c==='mie' || c==='lain') c='makanan'; // mapping lama
-    const show = (cat==='all' || c===cat);
-    card.style.display = show ? '' : 'none';
-    if(show) visible++;
-  });
-  const info = document.getElementById('categoryInfo');
-  if(info){
-    const label = cat==='all' ? 'Semua Menu' : cat.charAt(0).toUpperCase()+cat.slice(1);
-    info.textContent = visible ? `${label} • ${visible} menu` : `${label} • belum ada menu`;
-  }
-}
-// update info after original loadMenus finishes
-const origUpdateCart = window.updateCartUI;
-window.updateCartUI = function(){
-  if(typeof origUpdateCart==='function') origUpdateCart();
-  // after render, apply current filter
-  setTimeout(()=>{ filterKategori(currentFilter); }, 50);
-};
-</script>
-
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script>
-<script>
-// PATCH: force google button width to fit wrapper
-(function(){
-  const origInit = window.initGoogleLogin;
-  if(typeof origInit==='function'){
-    window.initGoogleLogin = function(){
-      try{ origInit(); }catch(e){}
-      setTimeout(()=>{
-        const box=document.getElementById('googleLoginBox');
-        if(box){
-          const w = Math.min(box.offsetWidth, 320);
-          if(window.google && google.accounts && google.accounts.id){
-            try{
-              box.innerHTML='';
-              google.accounts.id.renderButton(box,{theme:"outline",size:"large",text:"continue_with",shape:"pill",width:w,logo_alignment:"left"});
-            }catch(e){}
-          }
-        }
-      },500);
-    };
-  }
-})();
-</script>
-
+  <!-- Main Modular Entry Script -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
