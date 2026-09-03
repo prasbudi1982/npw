@@ -34,6 +34,17 @@ export function openCheckout() {
   updateWarungStatusUI();
   
   document.getElementById('checkoutModal').classList.remove('hidden');
+
+  // =========================================================
+  // TRIGGER DETEKSI GPS OTOMATIS SAAT MODAL CHECKOUT DIBUKA
+  // =========================================================
+  if (window.ModulesGps) {
+    if (typeof window.ModulesGps.silentAutoGpsOnCheckout === 'function') {
+      window.ModulesGps.silentAutoGpsOnCheckout();
+    } else if (typeof window.ModulesGps.autoDetectGps === 'function') {
+      window.ModulesGps.autoDetectGps(true);
+    }
+  }
 }
 
 export function bayar(method) {
@@ -272,3 +283,17 @@ export function copyWA() {
   if (!state.lastWA) { alert('Belum ada pesanan'); return; }
   navigator.clipboard.writeText(state.lastWA).then(() => alert('Dicopy!'));
 }
+
+// =========================================================
+// INISIATOR EVENT LISTENER (LISTENER PASTE/INPUT MAPS MANUAL)
+// =========================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const mapsInput = document.getElementById('custMaps') || document.getElementById('customerMaps');
+  if (mapsInput) {
+    mapsInput.addEventListener('input', () => {
+      if (window.ModulesGps && typeof window.ModulesGps.lockManualMap === 'function') {
+        window.ModulesGps.lockManualMap();
+      }
+    });
+  }
+});
