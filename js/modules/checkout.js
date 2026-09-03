@@ -19,7 +19,7 @@ export function autofillCustomerFromHistory() {
     if (addrEl && !addrEl.value && (profile.address || profile.alamat)) addrEl.value = profile.address || profile.alamat;
     if (mapsEl && !mapsEl.value && profile.maps) mapsEl.value = profile.maps;
   } catch (e) {
-    console.log('autofill fail', e);
+    console.warn('autofill fail', e);
   }
 }
 
@@ -31,44 +31,52 @@ export function openCheckout() {
   autofillCustomerFromHistory();
   
   // Perbarui UI tombol sesuai status warung dan slot Pre-Order yang dipilih
-  updateWarungStatusUI();
+  if (typeof updateWarungStatusUI === 'function') {
+    updateWarungStatusUI();
+  }
   
-  document.getElementById('checkoutModal').classList.remove('hidden');
+  const modal = document.getElementById('checkoutModal');
+  if (modal) modal.classList.remove('hidden');
 
-  // =========================================================
-  // TRIGGER DETEKSI GPS OTOMATIS SAAT MODAL CHECKOUT DIBUKA
-  // =========================================================
-  if (window.ModulesGps) {
-    if (typeof window.ModulesGps.silentAutoGpsOnCheckout === 'function') {
-      window.ModulesGps.silentAutoGpsOnCheckout();
-    } else if (typeof window.ModulesGps.autoDetectGps === 'function') {
-      window.ModulesGps.autoDetectGps(true);
+  // SAFE TRIGGER DETEKSI GPS OTOMATIS
+  try {
+    if (window.ModulesGps) {
+      if (typeof window.ModulesGps.silentAutoGpsOnCheckout === 'function') {
+        window.ModulesGps.silentAutoGpsOnCheckout();
+      } else if (typeof window.ModulesGps.autoDetectGps === 'function') {
+        window.ModulesGps.autoDetectGps(true);
+      }
     }
+  } catch (err) {
+    console.warn('GPS Auto-detect skipped:', err);
   }
 }
 
 export function bayar(method) {
   if (state.cart.length === 0) { alert('Keranjang kosong!'); return; }
 
-  // Proteksi Tambahan: Blokir transaksi jika warung tutup dan Pre-Order belum dipilih
   const slot = document.getElementById('preorderSlot')?.value || '';
   if (!state.WARUNG_IS_OPEN && !slot) {
     alert('⛔ Mohon maaf, warung sedang TUTUP. Silakan tentukan jam Pre-Order terlebih dahulu di menu atas!');
     return;
   }
   
-  const name = document.getElementById('custName').value.trim();
-  let phone = document.getElementById('custPhone').value.trim();
-  const addr = document.getElementById('custAddr').value.trim();
-  const mapsCheck = document.getElementById('custMaps').value.trim();
+  const nameEl = document.getElementById('custName');
+  const phoneEl = document.getElementById('custPhone');
+  const addrEl = document.getElementById('custAddr');
+  const mapsEl = document.getElementById('custMaps');
+
+  const name = nameEl ? nameEl.value.trim() : '';
+  let phone = phoneEl ? phoneEl.value.trim() : '';
+  const addr = addrEl ? addrEl.value.trim() : '';
+  const mapsCheck = mapsEl ? mapsEl.value.trim() : '';
 
   if (!name || !phone || !addr) { alert('Nama, HP, Alamat wajib diisi'); return; }
 
   const isValidPhone = window.ModulesAuth ? window.ModulesAuth.isValidIndonesianPhone(phone) : true;
   if (!isValidPhone) {
     alert('Nomor HP tidak valid.\nContoh valid: 0812xxxxxxx atau 62812xxxxxxx\nHarus nomor HP Indonesia aktif WA.');
-    const el = document.getElementById('custPhone');
-    if (el) { el.focus(); el.classList.add('border-red-500', '!border-red-500'); }
+    if (phoneEl) { phoneEl.focus(); phoneEl.classList.add('border-red-500', '!border-red-500'); }
     return;
   }
   
@@ -89,8 +97,11 @@ export function bayar(method) {
   const tableNoValue = addr + " | Maps: " + mapsCheck + " | Jarak: " + (state.curJarak ? state.curJarak.toFixed(3) + 'km' : '-') + " | Ongkir: " + (state.curOngkir === 0 ? "Gratis" : fmt(state.curOngkir)) + " | Warung: " + WARUNG.maps + " | Metode: " + method.toUpperCase() + (slot ? " | Pre-Order: " + slot : "") + " | COD/Pickup Only";
 
   state.curOrderId = 'NPW-' + Math.floor(100000 + Math.random() * 900000);
-  document.getElementById('payOrderId').textContent = state.curOrderId;
-  document.getElementById('payTotal').textContent = fmt(grand);
+  
+  const payOrderEl = document.getElementById('payOrderId');
+  const payTotalEl = document.getElementById('payTotal');
+  if (payOrderEl) payOrderEl.textContent = state.curOrderId;
+  if (payTotalEl) payTotalEl.textContent = fmt(grand);
 
   let rincian = `Halo Nasgor Pak W, ada pesanan baru!\n\nOrder: ${state.curOrderId}\nNama: ${name}\nHP: ${phone}\nAlamat: ${addr}\nMaps: ${mapsCheck}\n`;
   if (state.curJarak > 0) rincian += `Jarak: ${state.curJarak.toFixed(2)}km | Ongkir: ${state.curOngkir === 0 ? 'Gratis' : fmt(state.curOngkir)}\n`;
@@ -106,15 +117,17 @@ export function bayar(method) {
 
   rincian += `\nSubtotal: ${fmt(sub)}\nOngkir: ${state.curOngkir === 0 ? 'Gratis' : fmt(state.curOngkir)}\nTOTAL: ${fmt(grand)}\n\nMetode: ${method.toUpperCase()}\n`;
   
-  document.getElementById('payOrderDetail').textContent = rincian;
+  const payDetailEl = document.getElementById('payOrderDetail');
+  if (payDetailEl) payDetailEl.textContent = rincian;
   state.lastWA = rincian;
 
   const waUrl = "https://wa.me/6282296728478?text=" + encodeURIComponent(rincian);
-  document.getElementById('waLink').href = waUrl;
+  const waLinkEl = document.getElementById('waLink');
+  if (waLinkEl) waLinkEl.href = waUrl;
 
-  document.getElementById('checkoutModal').classList.add('hidden');
-  document.getElementById('cartBar').classList.add('hidden');
-  document.getElementById('paymentModal').classList.remove('hidden');
+  document.getElementById('checkoutModal')?.classList.add('hidden');
+  document.getElementById('cartBar')?.classList.add('hidden');
+  document.getElementById('paymentModal')?.classList.remove('hidden');
 
   const payload = {
     mode: method === 'pickup' ? "pickup" : "delivery",
@@ -159,8 +172,10 @@ export function handleWAConfirm(e) {
     return false;
   }
 
-  waLinkEl.textContent = 'Menyimpan real & validasi server...';
-  waLinkEl.style.pointerEvents = 'none';
+  if (waLinkEl) {
+    waLinkEl.textContent = 'Menyimpan real & validasi server...';
+    waLinkEl.style.pointerEvents = 'none';
+  }
 
   fetch(API_BASE + "/api/order", {
     method: "POST",
@@ -171,21 +186,26 @@ export function handleWAConfirm(e) {
   .then(res => {
     if (!res.ok) {
       alert('❌ Validasi server gagal: ' + (res.json?.error || 'Unknown') + '\nKode: ' + (res.json?.code || ''));
-      waLinkEl.textContent = '📲 Konfirmasi WA & Simpan (Real)';
-      waLinkEl.style.pointerEvents = 'auto';
+      if (waLinkEl) {
+        waLinkEl.textContent = '📲 Konfirmasi WA & Simpan (Real)';
+        waLinkEl.style.pointerEvents = 'auto';
+      }
       return;
     }
 
     if (res.json && res.json.orderId) {
       state.curOrderId = res.json.orderId;
-      document.getElementById('payOrderId').textContent = state.curOrderId;
+      const payOrderEl = document.getElementById('payOrderId');
+      if (payOrderEl) payOrderEl.textContent = state.curOrderId;
       
       let newRincian = state.lastWA.replace(/NPW-\d+/, state.curOrderId);
       state.lastWA = newRincian;
-      document.getElementById('payOrderDetail').textContent = newRincian;
+      
+      const payDetailEl = document.getElementById('payOrderDetail');
+      if (payDetailEl) payDetailEl.textContent = newRincian;
       
       state.pendingWAUrl = "https://wa.me/6282296728478?text=" + encodeURIComponent(newRincian);
-      waLinkEl.href = state.pendingWAUrl;
+      if (waLinkEl) waLinkEl.href = state.pendingWAUrl;
       localStorage.setItem('last_order_id', state.curOrderId);
 
       const hist = JSON.parse(localStorage.getItem('npw_history') || '[]');
@@ -216,7 +236,7 @@ export function handleWAConfirm(e) {
     }
 
     state.dbSaved = true;
-    waLinkEl.textContent = 'Membuka WA...';
+    if (waLinkEl) waLinkEl.textContent = 'Membuka WA...';
 
     setTimeout(() => {
       window.open(state.pendingWAUrl, '_blank');
@@ -226,8 +246,10 @@ export function handleWAConfirm(e) {
   .catch(err => {
     console.error('Fetch error:', err);
     alert('❌ Failed to fetch - Worker tidak bisa dihubungi:\n' + err.message + '\n\n1) Pastikan Worker https://nasgor-v2.welybudiprasetya.workers.dev/api/config bisa dibuka\n2) Cek internet\n3) Coba buka di tab baru: ' + API_BASE + '/api/config');
-    waLinkEl.textContent = '📲 Konfirmasi WA & Simpan';
-    waLinkEl.style.pointerEvents = 'auto';
+    if (waLinkEl) {
+      waLinkEl.textContent = '📲 Konfirmasi WA & Simpan';
+      waLinkEl.style.pointerEvents = 'auto';
+    }
   });
 
   return false;
@@ -238,11 +260,11 @@ export function closePaymentAndClearCart() {
   state.curAddons = {};
   state.curQty = 1;
   localStorage.removeItem('npw_cart');
-  updateCartUI();
+  if (typeof updateCartUI === 'function') updateCartUI();
 
-  document.getElementById('cartBar').classList.add('hidden');
-  document.getElementById('checkoutModal').classList.add('hidden');
-  document.getElementById('paymentModal').classList.add('hidden');
+  document.getElementById('cartBar')?.classList.add('hidden');
+  document.getElementById('checkoutModal')?.classList.add('hidden');
+  document.getElementById('paymentModal')?.classList.add('hidden');
 
   state.pendingPayload = null;
   state.dbSaved = false;
@@ -253,7 +275,9 @@ export function closePaymentAndClearCart() {
   state.curOngkir = 0;
   state.curJarak = 0;
 
-  if (window.ModulesGps) window.ModulesGps.checkMapValidationUI();
+  if (window.ModulesGps && typeof window.ModulesGps.checkMapValidationUI === 'function') {
+    window.ModulesGps.checkMapValidationUI();
+  }
 
   const waLinkEl = document.getElementById('waLink');
   if (waLinkEl) {
@@ -264,11 +288,11 @@ export function closePaymentAndClearCart() {
 }
 
 export function closePaymentModal() {
-  document.getElementById('paymentModal').classList.add('hidden');
+  document.getElementById('paymentModal')?.classList.add('hidden');
   if (state.dbSaved) {
     closePaymentAndClearCart();
   } else {
-    if (state.cart.length > 0) document.getElementById('cartBar').classList.remove('hidden');
+    if (state.cart.length > 0) document.getElementById('cartBar')?.classList.remove('hidden');
   }
 }
 
@@ -284,10 +308,8 @@ export function copyWA() {
   navigator.clipboard.writeText(state.lastWA).then(() => alert('Dicopy!'));
 }
 
-// =========================================================
-// INISIATOR EVENT LISTENER (LISTENER PASTE/INPUT MAPS MANUAL)
-// =========================================================
-document.addEventListener('DOMContentLoaded', () => {
+// SAFE EVENT ATTACHMENT
+function initMapsListener() {
   const mapsInput = document.getElementById('custMaps') || document.getElementById('customerMaps');
   if (mapsInput) {
     mapsInput.addEventListener('input', () => {
@@ -296,4 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMapsListener);
+} else {
+  initMapsListener();
+}
