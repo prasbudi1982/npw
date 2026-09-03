@@ -1,41 +1,90 @@
 /**
  * Modul Integrasi Google Sign-In & Validasi Format Telepon
  */
+
+const GOOGLE_CLIENT_ID = "783222505177-p7ite7jetiathok0fl927tsmu5m0ae0m.apps.googleusercontent.com";
+
 export function initGoogleAuth() {
   if (window.google?.accounts?.id) {
-    window.google.accounts.id.initialize({
-      client_id: "783222505177-p7ite7jetiathok0fl927tsmu5m0ae0m.apps.googleusercontent.com",
-      callback: handleGoogleResponse
-    });
-    
-    const loginBox = document.getElementById('googleLoginBox');
-    if (loginBox) {
-      window.google.accounts.id.renderButton(loginBox, { theme: "outline", size: "small" });
+    try {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+        auto_select: false
+      });
+
+      const loginBox = document.getElementById('googleLoginBox');
+      if (loginBox) {
+        // Bersihkan isi kontainer sebelum merender
+        loginBox.innerHTML = '';
+        
+        // Render tombol Google dengan penyesuaian lebar kontainer modal
+        const parentWidth = loginBox.clientWidth || 280;
+        window.google.accounts.id.renderButton(loginBox, { 
+          theme: "outline", 
+          size: "medium",
+          text: "signin_with",
+          shape: "pill",
+          width: Math.min(parentWidth, 320)
+        });
+      }
+    } catch (err) {
+      console.error('Google Auth Init Error:', err);
     }
+  } else {
+    setTimeout(initGoogleAuth, 800);
   }
 }
 
 function handleGoogleResponse(resp) {
   try {
-    const payload = JSON.parse(atob(resp.credential.split('.')[1]));
-    document.getElementById('custName').value = payload.name || '';
-    
-    document.getElementById('googlePic').src = payload.picture || '';
-    document.getElementById('googleName').textContent = payload.name || '';
-    document.getElementById('googleEmail').textContent = payload.email || '';
-    
-    document.getElementById('googleLoginBox').classList.add('hidden');
-    document.getElementById('googleProfileBox').classList.remove('hidden');
-    document.getElementById('googleLoginStatus').textContent = 'Terhubung';
+    const base64Url = resp.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const payload = JSON.parse(jsonPayload);
+
+    const nameEl = document.getElementById('custName');
+    if (nameEl && payload.name) nameEl.value = payload.name;
+
+    const picEl = document.getElementById('googlePic');
+    if (picEl) picEl.src = payload.picture || '';
+
+    const nameBox = document.getElementById('googleName');
+    if (nameBox) nameBox.textContent = payload.name || '';
+
+    const emailBox = document.getElementById('googleEmail');
+    if (emailBox) emailBox.textContent = payload.email || '';
+
+    const loginBox = document.getElementById('googleLoginBox');
+    if (loginBox) loginBox.classList.add('hidden');
+
+    const profileBox = document.getElementById('googleProfileBox');
+    if (profileBox) profileBox.classList.remove('hidden');
+
+    const statusEl = document.getElementById('googleLoginStatus');
+    if (statusEl) statusEl.textContent = 'Terhubung';
+
   } catch (e) {
     console.error('Google token parse error', e);
   }
 }
 
 export function googleLogout() {
-  document.getElementById('googleLoginBox').classList.remove('hidden');
-  document.getElementById('googleProfileBox').classList.add('hidden');
-  document.getElementById('googleLoginStatus').textContent = 'Opsional';
+  const loginBox = document.getElementById('googleLoginBox');
+  if (loginBox) loginBox.classList.remove('hidden');
+
+  const profileBox = document.getElementById('googleProfileBox');
+  if (profileBox) profileBox.classList.add('hidden');
+
+  const statusEl = document.getElementById('googleLoginStatus');
+  if (statusEl) statusEl.textContent = 'Opsional';
+
+  if (window.google?.accounts?.id) {
+    window.google.accounts.id.disableAutoSelect();
+  }
 }
 
 export function normalizePhoneForWA(raw) {
@@ -45,7 +94,7 @@ export function normalizePhoneForWA(raw) {
   if (p.startsWith('8')) p = '62' + p;
   p = p.replace(/^0+/, '');
   if (!p.startsWith('62')) {
-    if (p.length >= 9 && p.length <= 13 && !p.startsWith('62')) {
+    if (p.length >= 9 && p.length <= 13) {
       p = '62' + p.replace(/^0+/, '');
     }
   }
@@ -82,13 +131,13 @@ export function setupPhoneValidationEvents() {
   if (ph) {
     ph.setAttribute('inputmode', 'numeric');
     ph.setAttribute('placeholder', 'HP WA (08xx / 628xx) *');
-    
+
     ph.addEventListener('input', () => {
       let v = ph.value.replace(/[^0-9+\s\-]/g, '');
       if (v !== ph.value) ph.value = v;
       validatePhoneField();
     });
-    
+
     ph.addEventListener('blur', () => {
       const norm = normalizePhoneForWA(ph.value.trim());
       if (isValidIndonesianPhone(ph.value)) {
